@@ -78,6 +78,7 @@ if __name__ == '__main__':
     SystOpt = ["Central"]
     StudyNames = ["Fix30_2016_v1p2"]
     StudyNames = ["Cone08_2016_v1"]
+    StudyNames = ["JECSummer20L2Relative_2016_v1"]
     #Study = "%s/%s"%(StudyName, SubName) 
     #HaddFiles("Data_ZeroBias_Run2018Av2", Study, 56)
     #HaddFiles("Data_ZeroBias_Run2018Bv2", Study, 27)

@@ -1,6 +1,4 @@
 #!/bin/tcsh 
-setenv SCRAM_ARCH slc6_amd64_gcc530 
-source /cvmfs/cms.cern.ch/cmsset_default.csh 
 mkdir -p ./output/Cone08_2018_v1/PURunA/Central/SingleNeutrino_Flat2018 
 cmsenv 
 set inputlists = ("SingleNeutrino_Flat2018_30" ) 

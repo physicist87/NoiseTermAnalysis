@@ -90,6 +90,7 @@ if __name__ == '__main__':
     SubName = "Central"
     StudyNames = ["Fix30_2016_v1p2"]
     StudyNames = ["Cone08_2016_v1"]
+    StudyNames = ["JECSummer20L2Relative_2016_v1"]
     RunPeriod = ["PURunA","PURunB","PURunC","PURunD"]
     RunPeriod = ["MC"]
     RunPeriod = ["PURunA","PURunB","PURunC","PURunD"]

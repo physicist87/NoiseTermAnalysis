@@ -90,36 +90,27 @@ def MakeSampleIdxList(Sample,index_):
 
 
 if __name__ == '__main__':
-    StudyName = "AppliedJEC_v1"
-    SubName = "MuScale"
-    StudyName = "StudyRun2017_v5p1"
-    StudyName = "StudySC2017_v2"
-    StudyName = "StudyRun2017_v5p2"
 
-    Study = "%s/%s"%(StudyName,SubName) 
-    SystOpt = "PileUpUp"
-    SystOpt = "PileUpDown"
-    SystOpt = "All"
-    #SystOpt = "PileUpDown"
+    StudyName = "TestPFCHS_v1"
+    SubName = "NoMuScale"
+    #StudyName = "AppliedJEC_v4"
 
-    StudyName = "StudySC2018_v2"
-    StudyName = "StudySC2018_v5"
-    StudyName = "StudySC2018_v7"
-    StudyName = "StudySC2018_v8"
-    StudyName = ""
-    StudyName = "Cone05_2018_v1"
-    StudyName = "Cone03_2018_v1"
-    StudyName = "JECSummer20L2Relative_2018_v1"
+    StudyName = "Fix30_2017_v1"
+    StudyName = "StudySC2017_v5"
+    StudyName = "StudySC2017_v7"
+    StudyName = "Cone03_2017_v1"
+    StudyName = "Cone08_2017_v1"
+    #StudyName = "Cone05_2017_v1"
+    StudyName = "JECSummer20L2Relative_2017_v1"
     SubName = "MuScale"
     SubName = "NoMuScale"
     SubName = "MuScale"
     SubName = "NoMuScale"
     SubName = "MuScale"
     SubName = "NoMuScale"
-    SubName = "NoMuScale"
     SubName = "MuScale"
-    Study = "%s/%s/%s"%(StudyName,SubName, SystOpt) 
-    Study = "%s/%s"%(StudyName,SubName) 
+
+
     #HaddFiles("SingleNeutrino_Flat2018",StduyName,40)
     #HaddFiles("SingleNeutrino_Flat2018",StduyName,40)
 #     resubmit("Data_ZeroBias_Run2018Av2", StduyName, 222, "./configs/EtaBin_%s_%s.config"%(lower,upper))
@@ -146,7 +137,12 @@ if __name__ == '__main__':
         Study = "%s/%s/%s"%(StudyName, SubName, isys) 
 
         print Study
-        resubmit("Data_ZeroBias_Run2018Av2", Study, 56, "./configs/%s/Data_ZeroBias_Run2018Av2.config"%(Study))
-        resubmit("Data_ZeroBias_Run2018Bv2", Study, 27,"./configs/%s/Data_ZeroBias_Run2018Bv2.config"%(Study))
-        resubmit("Data_ZeroBias_Run2018Cv1", Study, 27, "./configs/%s/Data_ZeroBias_Run2018Cv1.config"%(Study))
-        resubmit("Data_ZeroBias_Run2018Dv1", Study,  126, "./configs/%s/Data_ZeroBias_Run2018Dv1.config"%(Study))
+        #resubmit("Data_ZeroBias_Run2018Av2", Study, 56, "./configs/%s/Data_ZeroBias_Run2018Av2.config"%(Study))
+        #resubmit("Data_ZeroBias_Run2018Bv2", Study, 27,"./configs/%s/Data_ZeroBias_Run2018Bv2.config"%(Study))
+        #resubmit("Data_ZeroBias_Run2018Cv1", Study, 27, "./configs/%s/Data_ZeroBias_Run2018Cv1.config"%(Study))
+        #resubmit("Data_ZeroBias_Run2018Dv1", Study,  126, "./configs/%s/Data_ZeroBias_Run2018Dv1.config"%(Study))
+        resubmit("Data_ZeroBias_Run2017Bv2",Study, 25, "./configs/%s/Data_PURunB.config"%(Study)) # Fix30
+        resubmit("Data_ZeroBias_Run2017Cv2",Study, 52, "./configs/%s/Data_PURunC.config"%(Study))
+        resubmit("Data_ZeroBias_Run2017Dv2",Study, 28, "./configs/%s/Data_PURunD.config"%(Study))
+        resubmit("Data_ZeroBias_Run2017Ev2",Study, 43, "./configs/%s/Data_PURunE.config"%(Study))
+        resubmit("Data_ZeroBias_Run2017Fv2",Study, 59, "./configs/%s/Data_PURunF.config"%(Study))

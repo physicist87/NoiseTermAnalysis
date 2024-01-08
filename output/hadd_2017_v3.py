@@ -85,6 +85,8 @@ if __name__ == '__main__':
     StudyNames = ["Cone03_2017_v1"]
     StudyNames = ["Cone05_2017_v1"]
     StudyNames = ["Cone08_2017_v1"]
+    StudyNames = ["JECSummer20L2Relative_2017_v1"]
+    StudyNames = ["JECSummer20L2Relative_2017_30GeV_v1"]
     for StudyName in StudyNames:
         for isys in SystOpt: 
             Study = "%s/%s/%s"%(StudyName, SubName, isys) 

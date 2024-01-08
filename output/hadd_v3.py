@@ -101,6 +101,7 @@ if __name__ == '__main__':
     StudyName = "Cone04_2018_v1"
     StudyNames = ["Cone03_2018_v1","Cone05_2018_v1"]
     StudyNames = ["Cone08_2018_v1"]
+    StudyNames = ["JECSummer20L2Relative_2018_v1"]
     #StudyName = "Fix30_2018_v1"
     SubName = "NoMuScale"
     SubName = "MuScale"
@@ -131,7 +132,7 @@ if __name__ == '__main__':
             HaddFiles("Data_ZeroBias_Run2018Av2", Study, 56)
             HaddFiles("Data_ZeroBias_Run2018Bv2", Study, 27)
             HaddFiles("Data_ZeroBias_Run2018Cv1", Study, 27)
-            #HaddFiles("Data_ZeroBias_Run2018Dv1", Study, 126)
+            HaddFiles("Data_ZeroBias_Run2018Dv1", Study, 126)
             #HaddFiles("SingleNeutrino_Flat2018",StduyName,40)
             #HaddFiles("SingleNeutrino_Flat2018",StduyName,40)
             #HaddFiles("Data_ZeroBias_Run2018Av2", Study, 56  )

@@ -116,6 +116,7 @@ if __name__ == '__main__':
     StudyName = "Cone05_2018_v1"
     StudyName = "Cone03_2018_v1"
     StudyName = "Cone08_2018_v1"
+    StudyName = "JECSummer20L2Relative_2018_v1"
     #StudyName = "Fix30_2018_v1"
     SubName = "MuScale"
     SubName = "NoMuScale"

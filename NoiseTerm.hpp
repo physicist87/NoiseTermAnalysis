@@ -93,9 +93,15 @@ class NoiseTerm : public NoiseTree
       bool doPUCor;
       bool doPreSC;
       bool doJEC;
+      bool isUseUserJEC;
       TString JECType;
       TString JECEra_;
       TString JetType_;
+      TString L1JetParsTxtName; 
+      TString L2JetParsTxtName; 
+      TString L3JetParsTxtName; 
+      TString ResJetParsTxtName; 
+      TString JecUncertTxtName; 
       int num_trig;
 
       double evtWeight;
@@ -254,10 +260,18 @@ NoiseTerm::NoiseTerm(TTree *tree, int rndseed, string ConfName)
        cout << "v_EtaBins : " << v_EtaBins.at(i) << endl;
 
   doJEC = SSBConfReader->GetBool("JECApply");
+  isUseUserJEC = SSBConfReader->GetBool("JECUserCust");
   JECType = SSBConfReader->GetText("JECType");
   JECEra_ = SSBConfReader->GetText("JECEra");
   JetType_ = SSBConfReader->GetText("JetType");
   RCone = SSBConfReader->GetNumber("JetCone");
+  if (isUseUserJEC) {
+     L1JetParsTxtName = SSBConfReader->GetText("L1JetParsTxtName"); 
+     L2JetParsTxtName = SSBConfReader->GetText("L2JetParsTxtName"); 
+     L3JetParsTxtName = SSBConfReader->GetText("L3JetParsTxtName"); 
+     ResJetParsTxtName = SSBConfReader->GetText("ResJetParsTxtName"); 
+     JecUncertTxtName = SSBConfReader->GetText("JecUncertTxtName"); 
+  }
 }
 
 NoiseTerm::~NoiseTerm()

@@ -91,7 +91,6 @@ def MakeSampleIdxList(Sample,index_):
 
 if __name__ == '__main__':
 
-
     StudyName = "TestPFCHS_v1"
     StudyName = "AppliedJEC_v1"
     StudyName = "AppliedJEC_v3"
@@ -104,41 +103,61 @@ if __name__ == '__main__':
     StudyName = "StudyRun2017_v5p1"
     StudyName = "StudySC2017_v1"
     StudyName = "StudySC2017_v2"
-    StudyName = "StudyRun2017_v5p2"
-    StudyName = "StudySC2017_v5p1"
+    StudyName = "StudySC2018_v2"
+    StudyName = "StudySC2018_v4"
     StudyName = "StudySC2018_v5"
-    StudyName = "StudySC2018_v7"
-    StudyName = "StudySC2017_v7"
-    StudyName = "Cone05_2017_v1"
+    StudyName = "StudySC2017_v5"
+    StudyName = "StudySC2017_v5p1"
+    StudyName = "Fix30_2017_v1"
     StudyName = "Cone03_2017_v1"
-    StudyName = "Cone08_2018_v1"
-    StudyName = "JECSummer20L2Relative_2018_v1"
+    StudyName = "Cone05_2017_v1"
+    StudyName = "Cone08_2017_v1"
+    StudyName = "JECSummer20L2Relative_2017_v1"
     #RunPeriod = ["PURunA","PURunB","PURunC","PURunD"]
-    RunPeriod = ["PURunB","PURunC","PURunD","PURunE","PURunF","MC"]
-    RunPeriod = ["PURunB","PURunC","PURunD","PURunE","PURunF","MC"]
-    #RunPeriod = ["MC"]
-    SystOpt = "PileUpUp"
-    SystOpt = "PileUpDown"
-    SystOpt = "L1Cor"
-    SystOpt = "All"
+    #RunPeriod = ["PURunB","PURunC","PURunD","PURunE","PURunF","MC"]
+    RunPeriod = ["MC"]
 
-    #SystOpt = "PileUpUp"
-
+    RunPeriod = ["PURunA","PURunB","PURunC","PURunD","PURunE","PURunF","MC"]
+    RunPeriod = ["PURunA","PURunB","PURunC","PURunD"]
+    RunPeriod = ["PURunA"]
+    RunPeriod = ["PURunA","PURunB","PURunC","PURunD"]
     RunPeriod = ["PURunB","PURunC","PURunD","PURunE","PURunF","MC"]
-    RunPeriod = ["PURunA","PURunB","PURunC","PURunD","MC"]
+    RunPeriod = ["MC"]
+    SystOpt = ["L1RC","L1RCNega","L1Nega","L1Cor","All","AllNega","AllRCNega","Central"]
+    SystOpt = ["L1RCNega","L1Nega"]
+    SystOpt = ["PileUpUp","PileUpDown","NoJEC","NoPU"]
+    SystOpt = ["Central","JECUp","JECDown"]
+    SystOpt = ["PileUpUp","PileUpDown","JECUp","JECDown"]
+    #SystOpt = ["PileUpUp","PileUpDown"]
+    SystOpt = ["Central","PileUpUp","PileUpDown","JECUp","JECDown"]
+    SystOpt = ["Central"]
     #RunPeriod = ["PURunD"]
     for ipu in RunPeriod:
-        Study = "%s/%s/PileUpUp"%(StudyName, ipu) 
-        Study = "%s/%s/Central"%(StudyName, ipu) 
-        #Study = "%s/%s/NoJEC"%(StudyName, ipu) 
-        #Study = "%s/%s/JECDown"%(StudyName, ipu) 
-        #Study = "%s/%s/NoPU"%(StudyName, ipu) 
-        #Study = "%s/%s/%s"%(StudyName, ipu, SystOpt) 
-        #Make_CondorScr("SingleNeutrino_Flat2017",Study,221,221, "./configs/%s/SingleNeutrino_Flat2017.config"%(Study))
-        #resubmit("SingleNeutrino_PreMix2017",Study,21,"./configs/%s/SingleNeutrino_PreMix2017.config"%(Study))
-        #resubmit("SingleNeutrino_Flat2017",Study,30, "./configs/%s/SingleNeutrino_Flat2018.config"%(Study))
-        #resubmit("SingleNeutrino_PreMix2017",Study, 30, "./configs/%s/SingleNeutrino_PreMix2017.config"%(Study))
-        resubmit("SingleNeutrino_Flat2018",Study,30, "./configs/%s/SingleNeutrino_Flat2018.config"%(Study))
+        for isys in SystOpt: 
+            Study = "%s/%s/PileUpUp"%(StudyName, ipu) 
+            Study = "%s/%s/Central"%(StudyName, ipu) 
+            #Study = "%s/%s/NoJEC"%(StudyName, ipu) 
+            #Study = "%s/%s/JECDown"%(StudyName, ipu) 
+            #Study = "%s/%s/NoPU"%(StudyName, ipu) 
+            #Study = "%s/%s/%s"%(StudyName, ipu, SystOpt) 
+            #Make_CondorScr("SingleNeutrino_Flat2017",Study,221,221, "./configs/%s/SingleNeutrino_Flat2017.config"%(Study))
+            #resubmit("SingleNeutrino_PreMix2017",Study,21,"./configs/%s/SingleNeutrino_PreMix2017.config"%(Study))
+            #resubmit("SingleNeutrino_Flat2017",Study,30, "./configs/%s/SingleNeutrino_Flat2018.config"%(Study))
+            #resubmit("SingleNeutrino_PreMix2017",Study, 30, "./configs/%s/SingleNeutrino_PreMix2017.config"%(Study))
+            #resubmit("SingleNeutrino_Flat2018",Study,30, "./configs/%s/SingleNeutrino_Flat2018.config"%(Study))
+            Study = "%s/%s/%s"%(StudyName, ipu, isys) 
+            #Study = "%s/%s"%(StudyName, ipu) 
+            #Make_CondorScr("SingleNeutrino_Flat2017",Study,221,221, "./configs/%s/SingleNeutrino_Flat2017.config"%(Study))
+            #Make_CondorScr("SingleNeutrino_Flat2017v2",Study,224,60, "./configs/%s/SingleNeutrino_Flat2017v2.config"%(Study))
+            #Make_CondorScr("SingleNeutrino_Flat2017v2",Study,224,60, "./configs/%s/SingleNeutrino_Flat2017v2.config"%(Study))
+       # Make_CondorScr("SingleNeutrino_Flat2017",Study,221,221, "./configs/%s/SingleNeutrino_Flat2017.config"%(Study))
+      
+            #if ipu == "PURunA" or ipu == "PURunB":Make_CondorScr("SingleNeutrino_Flat2018",Study,40,40, "./configs/%s/SingleNeutrino_Flat2018.config"%(Study))
+            #if ipu == "PURunC" or ipu == "PURunD":Make_CondorScr("SingleNeutrino_Flat2018_HEM",Study,79,79, "./configs/%s/SingleNeutrino_Flat2018_HEM.config"%(Study))
+            #if ipu == "MC" or ipu == "mc":
+                #Make_CondorScr("SingleNeutrino_Flat2018",Study,30, 30, "./configs/%s/SingleNeutrino_Flat2018.config"%(Study))
+            resubmit("SingleNeutrino_PreMix2017",Study, 21,"./configs/%s/SingleNeutrino_PreMix2017.config"%(Study))
+
    # Make_CondorScr("SingleNeutrino_Flat2017",Study,221,221, "./configs/%s/SingleNeutrino_Flat2017.config"%(Study))
 
         #if ipu == "PURunA" or ipu == "PURunB":Make_CondorScr("SingleNeutrino_NoPU",Study,40,40, "./configs/%s/SingleNeutrino_NoPU.config"%(Study))

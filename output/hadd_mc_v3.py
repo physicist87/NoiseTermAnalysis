@@ -122,6 +122,7 @@ if __name__ == '__main__':
     SystOpt = ["Central"]
     StudyNames = ["Cone03_2018_v1","Cone05_2018_v1"]
     StudyNames = ["Cone08_2018_v1"]
+    StudyNames = ["JECSummer20L2Relative_2018_v1"]
     for StudyName in StudyNames:
         for ipu in RunPeriod:
             for isys in SystOpt: 

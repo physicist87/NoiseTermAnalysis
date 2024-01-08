@@ -103,6 +103,8 @@ if __name__ == '__main__':
     StudyName = "Cone03_2017_v1"
     StudyName = "Cone08_2017_v1"
     #StudyName = "Cone05_2017_v1"
+    StudyName = "JECSummer20L2Relative_2017_v1"
+    StudyName = "JECSummer20L2Relative_2017_30GeV_v1"
     SubName = "MuScale"
     SubName = "NoMuScale"
     SubName = "MuScale"

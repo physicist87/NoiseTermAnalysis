@@ -93,13 +93,44 @@ void NoiseTerm::Loop()
       //cout << "era_ : " << era_ << endl;
       string jet_type_ = Form("%s", JetType_.Data());
 
-      JetCorrectorParameters* L1JetPars  = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L1FastJet_"    +  jet_type_ + ".txt");
+/*      JetCorrectorParameters* L1JetPars  = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L1FastJet_"    +  jet_type_ + ".txt");
 
       JetCorrectorParameters* L2JetPars  = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L2Relative_"   +  jet_type_ + ".txt");
       JetCorrectorParameters* L3JetPars  = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L3Absolute_"   +  jet_type_ + ".txt");
       JetCorrectorParameters* ResJetPars = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L2L3Residual_" +  jet_type_ + ".txt");
 
       JetCorrectionUncertainty* JecUncert = new JetCorrectionUncertainty(jer_sf_file + era_ + "/" + era_ + "_Uncertainty_" +  jet_type_ + ".txt");
+*/
+
+
+
+      JetCorrectorParameters* L1JetPars;
+      JetCorrectorParameters* L2JetPars;
+      JetCorrectorParameters* L3JetPars;
+      JetCorrectorParameters* ResJetPars;
+      JetCorrectionUncertainty* JecUncert;
+
+
+
+
+      if (isUseUserJEC){
+          //cout << "check out : L1JetParsTxtName : " << Form("%s/%s",jer_sf_file.c_str(), L1JetParsTxtName.Data()) << endl; 
+          L1JetPars  = new JetCorrectorParameters(Form("%s/%s",jer_sf_file.c_str(), L1JetParsTxtName.Data()));
+          L2JetPars  = new JetCorrectorParameters(Form("%s/%s",jer_sf_file.c_str(), L2JetParsTxtName.Data()));
+          L3JetPars  = new JetCorrectorParameters(Form("%s/%s",jer_sf_file.c_str(), L3JetParsTxtName.Data()));
+          ResJetPars  = new JetCorrectorParameters(Form("%s/%s",jer_sf_file.c_str(), ResJetParsTxtName.Data()));
+          JecUncert  = new JetCorrectionUncertainty(Form("%s/%s",jer_sf_file.c_str(), JecUncertTxtName.Data()));
+      }
+
+
+      else {
+         L1JetPars  = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L1FastJet_"    +  jet_type_ + ".txt");
+         L2JetPars  = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L2Relative_"   +  jet_type_ + ".txt");
+         L3JetPars  = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L3Absolute_"   +  jet_type_ + ".txt");
+         ResJetPars = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L2L3Residual_" +  jet_type_ + ".txt");
+         JecUncert = new JetCorrectionUncertainty(jer_sf_file + era_ + "/" + era_ + "_Uncertainty_" +  jet_type_ + ".txt");
+      }
+
       bool doL1L2L3Res_ = true;
       if (doL1L2L3Res_){
         //jetPars.push_back( *L1JetPars );
@@ -177,14 +208,16 @@ void NoiseTerm::Loop()
             double l2l3jec_ = -999;
            
             jetCorrectorsL23->setJetEta( v_rc1jet_eta.at(i) );
-            jetCorrectorsL23->setJetPt( 15.0 ); // To avoid wrong JEC with low energy region... //
+            //jetCorrectorsL23->setJetPt( 15.0 ); // To avoid wrong JEC with low energy region... //
+            jetCorrectorsL23->setJetPt( 30.0 ); // To avoid wrong JEC with low energy region... //
       //      jetCorrectorsL23->setJetPt( jetrc1_pt ); // To avoid wrong JEC with low energy region... //
             jetCorrectorsL23->setJetA( jetArea_ );
             jetCorrectorsL23->setRho(rho);
             jec_rc1 = jetCorrectorsL23->getCorrection();
 
             jetCorrectorsL23->setJetEta( v_rc2jet_eta.at(i) );
-            jetCorrectorsL23->setJetPt( 15.0 ); // To avoid wrong JEC with low energy region... //
+            //jetCorrectorsL23->setJetPt( 15.0 ); // To avoid wrong JEC with low energy region... //
+            jetCorrectorsL23->setJetPt( 30.0 ); // To avoid wrong JEC with low energy region... //
       //      jetCorrectorsL23->setJetPt( jetrc2_pt ); // To avoid wrong JEC with low energy region... //
             jetCorrectorsL23->setJetA( jetArea_ );
             jetCorrectorsL23->setRho(rho);

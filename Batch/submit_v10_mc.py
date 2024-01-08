@@ -116,6 +116,7 @@ if __name__ == '__main__':
     StudyName = "Cone03_2018_v1"
     StudyName = "Cone05_2018_v1"
     StudyName = "Cone08_2018_v1"
+    StudyName = "JECSummer20L2Relative_2018_v1"
     #RunPeriod = ["PURunB","PURunC","PURunD","PURunE","PURunF","MC"]
     RunPeriod = ["MC"]
     RunPeriod = ["PURunA","PURunB","PURunC","PURunD"]
