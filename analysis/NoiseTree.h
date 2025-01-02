@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Mon Mar 27 12:37:45 2023 by ROOT version 6.14/09
+// Thu Jan  2 11:22:41 2025 by ROOT version 6.26/04
 // from TTree T/Offset Tree
-// found on file: dcap://cluster142.knu.ac.kr//pnfs/knu.ac.kr/data/cms/store/user/sha/JERNosieStudy/SingleNeutrino/SingleNeutrino/crab_SingleConeTest_FlatPU0to75_v2p3/230315_144919/0000/Offset_MC_100.root
+// found on file: /u/user/sha/SE_UserHome/JERNosieStudy/SingleNeutrino/SingleNeutrino/crab_PUPPITest_FlatPU0to75_v1/250101_162450/0000/Offset_MC_219.root
 //////////////////////////////////////////////////////////
 
 #ifndef NoiseTree_h
@@ -38,6 +38,7 @@ public :
    vector<float>   *pf_et;
    vector<float>   *pf_energy;
    vector<float>   *pf_m;
+   vector<float>   *pf_puppiW;
    Float_t         mu;
    Float_t         muWeight;
    Float_t         rho;
@@ -47,9 +48,9 @@ public :
    Float_t         rhoCentralCalo;
    Int_t           nPVall;
    Int_t           nPV;
-   Float_t         pv_ndof[136];   //[nPVall]
-   Float_t         pv_z[136];   //[nPVall]
-   Float_t         pv_rho[136];   //[nPVall]
+   Float_t         pv_ndof[128];   //[nPVall]
+   Float_t         pv_z[128];   //[nPVall]
+   Float_t         pv_rho[128];   //[nPVall]
    Int_t           nEta;
    Float_t         energy[82];   //[nEta]
    Float_t         et[82];   //[nEta]
@@ -153,6 +154,7 @@ public :
    TBranch        *b_pf_et;   //!
    TBranch        *b_pf_energy;   //!
    TBranch        *b_pf_m;   //!
+   TBranch        *b_pf_puppiW;   //!
    TBranch        *b_mu;   //!
    TBranch        *b_muWeight;   //!
    TBranch        *b_rho;   //!
@@ -276,15 +278,16 @@ NoiseTree::NoiseTree(TTree *tree) : fChain(0)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
-   if (tree == 0) {/*
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dcap://cluster142.knu.ac.kr//pnfs/knu.ac.kr/data/cms/store/user/sha/JERNosieStudy/SingleNeutrino/SingleNeutrino/crab_SingleConeTest_FlatPU0to75_v2p3/230315_144919/0000/Offset_MC_100.root");
+   if (tree == 0) {
+/*
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/u/user/sha/SE_UserHome/JERNosieStudy/SingleNeutrino/SingleNeutrino/crab_PUPPITest_FlatPU0to75_v1/250101_162450/0000/Offset_MC_219.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("dcap://cluster142.knu.ac.kr//pnfs/knu.ac.kr/data/cms/store/user/sha/JERNosieStudy/SingleNeutrino/SingleNeutrino/crab_SingleConeTest_FlatPU0to75_v2p3/230315_144919/0000/Offset_MC_100.root");
+         f = new TFile("/u/user/sha/SE_UserHome/JERNosieStudy/SingleNeutrino/SingleNeutrino/crab_PUPPITest_FlatPU0to75_v1/250101_162450/0000/Offset_MC_219.root");
       }
-      TDirectory * dir = (TDirectory*)f->Get("dcap://cluster142.knu.ac.kr//pnfs/knu.ac.kr/data/cms/store/user/sha/JERNosieStudy/SingleNeutrino/SingleNeutrino/crab_SingleConeTest_FlatPU0to75_v2p3/230315_144919/0000/Offset_MC_100.root:/pf");
+      TDirectory * dir = (TDirectory*)f->Get("/u/user/sha/SE_UserHome/JERNosieStudy/SingleNeutrino/SingleNeutrino/crab_PUPPITest_FlatPU0to75_v1/250101_162450/0000/Offset_MC_219.root:/pf");
       dir->GetObject("T",tree);
 
-   */}
+*/   }
    Init(tree);
 }
 
@@ -333,6 +336,7 @@ void NoiseTree::Init(TTree *tree)
    pf_et = 0;
    pf_energy = 0;
    pf_m = 0;
+   pf_puppiW = 0;
    particle_id = 0;
    particle_pt = 0;
    particle_eta = 0;
@@ -408,6 +412,7 @@ void NoiseTree::Init(TTree *tree)
    fChain->SetBranchAddress("pf_et", &pf_et, &b_pf_et);
    fChain->SetBranchAddress("pf_energy", &pf_energy, &b_pf_energy);
    fChain->SetBranchAddress("pf_m", &pf_m, &b_pf_m);
+   fChain->SetBranchAddress("pf_puppiW", &pf_puppiW, &b_pf_puppiW);
    fChain->SetBranchAddress("mu", &mu, &b_mu);
    fChain->SetBranchAddress("muWeight", &muWeight, &b_muWeight);
    fChain->SetBranchAddress("rho", &rho, &b_rho);
