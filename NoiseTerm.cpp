@@ -124,6 +124,8 @@ void NoiseTerm::Loop()
 
 
       else {
+	// cout << Form(jer_sf_file + era_ + "/" + era_ + "_L1FastJet_"    +  jet_type_ + ".txt") << endl;
+	// cout << Form((jer_sf_file + era_ + "/" + era_ + "_L1FastJet_" + jet_type_ + ".txt").c_str()) << endl;
          L1JetPars  = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L1FastJet_"    +  jet_type_ + ".txt");
          L2JetPars  = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L2Relative_"   +  jet_type_ + ".txt");
          L3JetPars  = new JetCorrectorParameters(jer_sf_file + era_ + "/" + era_ + "_L3Absolute_"   +  jet_type_ + ".txt");
@@ -208,16 +210,16 @@ void NoiseTerm::Loop()
             double l2l3jec_ = -999;
            
             jetCorrectorsL23->setJetEta( v_rc1jet_eta.at(i) );
-            //jetCorrectorsL23->setJetPt( 15.0 ); // To avoid wrong JEC with low energy region... //
-            jetCorrectorsL23->setJetPt( 30.0 ); // To avoid wrong JEC with low energy region... //
+            jetCorrectorsL23->setJetPt( 15.0 ); // To avoid wrong JEC with low energy region... //
+            //jetCorrectorsL23->setJetPt( 30.0 ); // To avoid wrong JEC with low energy region... //
       //      jetCorrectorsL23->setJetPt( jetrc1_pt ); // To avoid wrong JEC with low energy region... //
             jetCorrectorsL23->setJetA( jetArea_ );
             jetCorrectorsL23->setRho(rho);
             jec_rc1 = jetCorrectorsL23->getCorrection();
 
             jetCorrectorsL23->setJetEta( v_rc2jet_eta.at(i) );
-            //jetCorrectorsL23->setJetPt( 15.0 ); // To avoid wrong JEC with low energy region... //
-            jetCorrectorsL23->setJetPt( 30.0 ); // To avoid wrong JEC with low energy region... //
+            jetCorrectorsL23->setJetPt( 15.0 ); // To avoid wrong JEC with low energy region... //
+            //jetCorrectorsL23->setJetPt( 30.0 ); // To avoid wrong JEC with low energy region... //
       //      jetCorrectorsL23->setJetPt( jetrc2_pt ); // To avoid wrong JEC with low energy region... //
             jetCorrectorsL23->setJetA( jetArea_ );
             jetCorrectorsL23->setRho(rho);
