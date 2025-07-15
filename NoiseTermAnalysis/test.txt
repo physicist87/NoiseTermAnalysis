@@ -1,0 +1,151 @@
+RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
+{   
+   bool isPFInCone1 = false;
+   bool isPFInCone2 = false;
+   
+   double pt1 = 0;
+   double pt2 = 0;
+   
+   TLorentzVector clusterVectorE;  // 루프 외부에 선언해서 재사용
+   TLorentzVector SumRCone1;
+   TLorentzVector SumRCone2;
+   
+   TLorentzVector rndmCone1;
+   TLorentzVector rndmCone2;
+   
+   TLorentzVector JetCone1;
+   TLorentzVector JetCone2;
+   
+   double eta1 = -999;
+   double eta2 = -999;
+   double phi1 = -999;
+   double phi2 = -999;
+   
+   ////////////////////////////////////////////
+   /// How many choose random cone in event ///
+   ////////////////////////////////////////////
+   
+   int NumOfSelct = 0;
+   int maxSelct = 1;
+   
+   double RangePhi = TMath::Pi() * 2.;
+   double RangeEta = (upperEta - lowerEta) * 2;
+
+   double depositERC1 = 0;
+   double depositERC2 = 0;
+
+   double depositETRC1 = 0;
+   double depositETRC2 = 0;
+   
+   int num_rc1_pf = 0;
+   int num_rc2_pf = 0;
+   
+   // RC 루프 시작
+   while ((isPFInCone1 == false || isPFInCone2 == false) && NumOfSelct < maxSelct) 
+   {
+      NumOfSelct++;
+      phi1 = rand->Uniform(-1 * TMath::Pi(), TMath::Pi());
+      phi2 = rand->Uniform(-1 * TMath::Pi(), TMath::Pi());
+      
+      double rndValue = rand->Rndm();
+      
+      if (rndValue < .5) { 
+         eta1 = -upperEta + rndValue * RangeEta; 
+      } else { 
+         eta1 = lowerEta + (rndValue - .5) * RangeEta; 
+      }
+      
+      rndValue = rand->Rndm();
+      if (rndValue < .5) { 
+         eta2 = -upperEta + rndValue * RangeEta; 
+      } else { 
+         eta2 = lowerEta + (rndValue - .5) * RangeEta; 
+      }
+    
+      if (eta1 * eta2 > 0.) {
+         eta2 = -1 * eta2;
+      }
+  
+      // Set Direction of RCs 
+      rndmCone1.SetPtEtaPhiE(500, eta1, phi1, 500); 
+      rndmCone2.SetPtEtaPhiE(2000, eta2, phi2, 2000);
+      
+      SumRCone1.Clear();  // 객체 초기화
+      SumRCone2.Clear();
+      
+      isPFInCone1 = false;
+      isPFInCone2 = false;
+      
+      bool overlayed_ = false;
+
+      // RCone 거리 계산
+      if (fabs(rndmCone2.DeltaR(rndmCone1)) < 2 * RCone) { continue; }
+      if (!jveto->VetoCheck(eta1, phi1)) { continue; }
+      if (!jveto->VetoCheck(eta2, phi2)) { continue; }
+
+      // PF candidates에 대한 루프
+      for (unsigned int i = 0; i < pf_pt->size(); i++) 
+      {
+         if (IsPFCHS(pf_type->at(i)) == false) { continue; }
+         
+         clusterVectorE.SetPtEtaPhiE(pf_pt->at(i), pf_eta->at(i), pf_phi->at(i), pf_energy->at(i));
+         
+         bool tempInCone1 = false;
+         bool tempInCone2 = false;
+         
+         if (fabs(rndmCone1.DeltaR(clusterVectorE)) < RCone) 
+         {
+            SumRCone1 = SumRCone1 + clusterVectorE;
+            isPFInCone1 = true;
+            tempInCone1 = true;
+            depositERC1 += pf_energy->at(i);
+            depositETRC1 += pf_et->at(i);
+            num_rc1_pf++;
+         }
+         
+         if (fabs(rndmCone2.DeltaR(clusterVectorE)) < RCone) 
+         {
+            SumRCone2 = SumRCone2 + clusterVectorE;
+            isPFInCone2 = true;
+            tempInCone2 = true;
+            depositERC2 += pf_energy->at(i);
+            depositETRC2 += pf_et->at(i);
+            num_rc2_pf++;
+         }
+         
+         if (tempInCone1 && tempInCone2) {
+            overlayed_ = true;
+            break;
+         }
+      }
+      
+      if (overlayed_) { continue; }
+   } // while 루프 종료
+
+   /// Obtain difference of pt between RC1 and RC2
+   double diff_ = -99999999;
+
+   RandCone tmp;
+   bool isRC = false;
+   
+   if (NumOfSelct <= maxSelct && isPFInCone1 && isPFInCone2) 
+   {
+      isRC = true;
+
+      diff_ = depositETRC1 - depositETRC2;
+      JetCone1.SetPtEtaPhiE(depositETRC1, eta1, phi1, depositETRC1);
+      JetCone2.SetPtEtaPhiE(depositETRC2, eta2, phi2, depositETRC2);
+   }
+   
+   tmp.diff_ = diff_;
+   tmp.findRC = isRC;
+   tmp.rc1 = JetCone1;
+   tmp.rc2 = JetCone2;
+   tmp.num_pfcan_rc1 = num_rc1_pf;
+   tmp.num_pfcan_rc2 = num_rc2_pf;
+   tmp.vecrc1 = SumRCone1;
+   tmp.vecrc2 = SumRCone2;
+   
+   return tmp;
+}
+

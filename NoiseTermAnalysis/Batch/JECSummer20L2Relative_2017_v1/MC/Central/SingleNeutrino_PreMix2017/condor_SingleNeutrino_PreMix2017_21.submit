@@ -1,0 +1,9 @@
+# Unix submit description file
+Universe = vanilla
+Executable = ./JECSummer20L2Relative_2017_v1/MC/Central/SingleNeutrino_PreMix2017_21.sh
+request_memory = 15000 
+should_transfer_files   = Yes
+Output      = ./JECSummer20L2Relative_2017_v1/MC/Central/SingleNeutrino_PreMix2017/SingleNeutrino_PreMix2017_21.output
+error       = ./JECSummer20L2Relative_2017_v1/MC/Central/SingleNeutrino_PreMix2017/errors_SingleNeutrino_PreMix2017_21.txt
+log         = ./JECSummer20L2Relative_2017_v1/MC/Central/SingleNeutrino_PreMix2017/test_SingleNeutrino_PreMix2017_21.log
+Queue 1

@@ -1,0 +1,124 @@
+000 (224956.000.000) 2024-07-05 15:40:57 Job submitted from host: <155.230.20.251:9618?addrs=155.230.20.251-9618&alias=cms.knu.ac.kr&noUDP&sock=schedd_5970_807d>
+...
+040 (224956.000.000) 2024-07-05 17:30:04 Started transferring input files
+	Transferring to host: <155.230.21.145:9618?addrs=155.230.21.145-9618+[2407-c000-c024-0-ae1f-6bff-fe01-4136]-9618&alias=cluster345.knu.ac.kr&noUDP&sock=slot1_5_8519_27f3_12903>
+...
+040 (224956.000.000) 2024-07-05 17:30:04 Finished transferring input files
+...
+001 (224956.000.000) 2024-07-05 17:30:05 Job executing on host: <155.230.21.145:9618?addrs=155.230.21.145-9618+[2407-c000-c024-0-ae1f-6bff-fe01-4136]-9618&alias=cluster345.knu.ac.kr&noUDP&sock=startd_8483_35fc>
+	SlotName: slot1_5@cluster345.knu.ac.kr
+	CondorScratchDir = "/home/condor/dir_11660"
+	Cpus = 1
+	Disk = 1906829
+	Memory = 15000
+...
+006 (224956.000.000) 2024-07-05 17:30:06 Image size of job updated: 16068
+	16  -  MemoryUsage of job (MB)
+	15620  -  ResidentSetSize of job (KB)
+...
+040 (224956.000.000) 2024-07-05 17:30:06 Started transferring output files
+...
+040 (224956.000.000) 2024-07-05 17:30:06 Finished transferring output files
+...
+005 (224956.000.000) 2024-07-05 17:30:06 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	233  -  Run Bytes Sent By Job
+	646  -  Run Bytes Received By Job
+	233  -  Total Bytes Sent By Job
+	646  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                 1         1 
+	   Disk (KB)            :       12        1   1906829 
+	   Memory (MB)          :       16    15000     15000 
+
+	Job terminated of its own accord at 2024-07-05T08:30:06Z with exit-code 0.
+...
+000 (1129156.000.000) 2024-07-08 13:46:26 Job submitted from host: <155.230.23.71:9618?addrs=155.230.23.71-9618&alias=cms01.knu.ac.kr&noUDP&sock=schedd_2137_61fa>
+...
+040 (1129156.000.000) 2024-07-08 13:47:06 Started transferring input files
+	Transferring to host: <155.230.21.148:9618?addrs=155.230.21.148-9618+[2407-c000-c024-0-3673-79ff-fe17-4902]-9618&alias=cluster348.knu.ac.kr&noUDP&sock=slot1_5_8906_d523_6187>
+...
+040 (1129156.000.000) 2024-07-08 13:47:06 Finished transferring input files
+...
+001 (1129156.000.000) 2024-07-08 13:47:07 Job executing on host: <155.230.21.148:9618?addrs=155.230.21.148-9618+[2407-c000-c024-0-3673-79ff-fe17-4902]-9618&alias=cluster348.knu.ac.kr&noUDP&sock=startd_8870_a923>
+	SlotName: slot1_5@cluster348.knu.ac.kr
+	CondorScratchDir = "/home/condor/dir_15651"
+	Cpus = 1
+	Disk = 926525
+	Memory = 15000
+...
+006 (1129156.000.000) 2024-07-08 13:47:13 Image size of job updated: 11448
+	8  -  MemoryUsage of job (MB)
+	7960  -  ResidentSetSize of job (KB)
+...
+040 (1129156.000.000) 2024-07-08 13:47:13 Started transferring output files
+...
+040 (1129156.000.000) 2024-07-08 13:47:13 Finished transferring output files
+...
+005 (1129156.000.000) 2024-07-08 13:47:13 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	233  -  Run Bytes Sent By Job
+	646  -  Run Bytes Received By Job
+	233  -  Total Bytes Sent By Job
+	646  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                 1         1 
+	   Disk (KB)            :       12        1    926525 
+	   Memory (MB)          :        8    15000     15000 
+
+	Job terminated of its own accord at 2024-07-08T04:47:13Z with exit-code 0.
+...
+000 (1129591.000.000) 2024-07-08 14:10:54 Job submitted from host: <155.230.23.71:9618?addrs=155.230.23.71-9618&alias=cms01.knu.ac.kr&noUDP&sock=schedd_2137_61fa>
+...
+040 (1129591.000.000) 2024-07-08 14:25:13 Started transferring input files
+	Transferring to host: <155.230.21.135:9618?addrs=155.230.21.135-9618+[2407-c000-c024-0-a6bf-1ff-fe8f-f57f]-9618&alias=cluster335.knu.ac.kr&noUDP&sock=slot1_12_2657_d8c5_6944>
+...
+040 (1129591.000.000) 2024-07-08 14:25:14 Finished transferring input files
+...
+001 (1129591.000.000) 2024-07-08 14:25:15 Job executing on host: <155.230.21.135:9618?addrs=155.230.21.135-9618+[2407-c000-c024-0-a6bf-1ff-fe8f-f57f]-9618&alias=cluster335.knu.ac.kr&noUDP&sock=startd_2621_5dd1>
+	SlotName: slot1_12@cluster335.knu.ac.kr
+	CondorScratchDir = "/home/condor/dir_137052"
+	Cpus = 1
+	Disk = 1913738
+	Memory = 15000
+...
+006 (1129591.000.000) 2024-07-08 14:25:23 Image size of job updated: 25724
+	2  -  MemoryUsage of job (MB)
+	1608  -  ResidentSetSize of job (KB)
+...
+006 (1129591.000.000) 2024-07-08 14:30:23 Image size of job updated: 12662180
+	12365  -  MemoryUsage of job (MB)
+	12661368  -  ResidentSetSize of job (KB)
+...
+012 (1129591.000.000) 2024-07-08 15:25:31 Job was held.
+	too much request_memory: (RequestMemory - MemoryUsage) > 2048
+	Code 26 Subcode 0
+...
+013 (1129591.000.000) 2024-07-08 15:30:07 Job was released.
+	via condor_release (by user condor)
+...
+040 (1129591.000.000) 2024-07-08 17:42:44 Started transferring input files
+	Transferring to host: <155.230.20.26:9618?addrs=155.230.20.26-9618+[2407-c000-c024-0-2efd-a1ff-fe34-454b]-9618&alias=dm01.knu.ac.kr&noUDP&sock=slot1_14_3236_cdfd_1654>
+...
+040 (1129591.000.000) 2024-07-08 17:42:44 Finished transferring input files
+...
+001 (1129591.000.000) 2024-07-08 17:42:45 Job executing on host: <155.230.20.26:9618?addrs=155.230.20.26-9618+[2407-c000-c024-0-2efd-a1ff-fe34-454b]-9618&alias=dm01.knu.ac.kr&noUDP&sock=startd_3194_6595>
+	SlotName: slot1_14@dm01.knu.ac.kr
+	AvailableGPUs = {  }
+	CondorScratchDir = "/home/condor/dir_11121"
+	Cpus = 1
+	Disk = 1801718
+	GPUs = 0
+	Memory = 15700
+...
+009 (1129591.000.000) 2024-07-12 00:43:00 Job was aborted.
+	Job removed by SYSTEM_PERIODIC_REMOVE due to exceeded max walltime.
+...

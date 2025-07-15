@@ -1,0 +1,85 @@
+000 (1129333.000.000) 2024-07-08 13:51:44 Job submitted from host: <155.230.23.71:9618?addrs=155.230.23.71-9618&alias=cms01.knu.ac.kr&noUDP&sock=schedd_2137_61fa>
+...
+040 (1129333.000.000) 2024-07-08 13:57:15 Started transferring input files
+	Transferring to host: <155.230.21.143:9618?addrs=155.230.21.143-9618+[2407-c000-c024-0-ec4-7aff-fe6d-31da]-9618&alias=cluster343.knu.ac.kr&noUDP&sock=slot1_2_8670_8c9a_14422>
+...
+040 (1129333.000.000) 2024-07-08 13:57:15 Finished transferring input files
+...
+001 (1129333.000.000) 2024-07-08 13:57:16 Job executing on host: <155.230.21.143:9618?addrs=155.230.21.143-9618+[2407-c000-c024-0-ec4-7aff-fe6d-31da]-9618&alias=cluster343.knu.ac.kr&noUDP&sock=startd_8600_7691>
+	SlotName: slot1_2@cluster343.knu.ac.kr
+	CondorScratchDir = "/home/condor/dir_7860"
+	Cpus = 1
+	Disk = 1952527
+	Memory = 20000
+...
+006 (1129333.000.000) 2024-07-08 13:57:18 Image size of job updated: 12940
+	10  -  MemoryUsage of job (MB)
+	9336  -  ResidentSetSize of job (KB)
+...
+040 (1129333.000.000) 2024-07-08 13:57:19 Started transferring output files
+...
+040 (1129333.000.000) 2024-07-08 13:57:21 Finished transferring output files
+...
+005 (1129333.000.000) 2024-07-08 13:57:21 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	233  -  Run Bytes Sent By Job
+	644  -  Run Bytes Received By Job
+	233  -  Total Bytes Sent By Job
+	644  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                 1         1 
+	   Disk (KB)            :       12        1   1952527 
+	   Memory (MB)          :       10    20000     20000 
+
+	Job terminated of its own accord at 2024-07-08T04:57:18Z with exit-code 0.
+...
+000 (1129540.000.000) 2024-07-08 14:10:14 Job submitted from host: <155.230.23.71:9618?addrs=155.230.23.71-9618&alias=cms01.knu.ac.kr&noUDP&sock=schedd_2137_61fa>
+...
+040 (1129540.000.000) 2024-07-09 02:59:46 Started transferring input files
+	Transferring to host: <155.230.20.27:9618?addrs=155.230.20.27-9618&alias=dm02.knu.ac.kr&noUDP&sock=slot1_4_3416_a184_3745>
+...
+040 (1129540.000.000) 2024-07-09 02:59:46 Finished transferring input files
+...
+001 (1129540.000.000) 2024-07-09 02:59:47 Job executing on host: <155.230.20.27:9618?addrs=155.230.20.27-9618&alias=dm02.knu.ac.kr&noUDP&sock=startd_3313_055a>
+	SlotName: slot1_4@dm02.knu.ac.kr
+	AvailableGPUs = {  }
+	CondorScratchDir = "/home/condor/dir_15259"
+	Cpus = 1
+	Disk = 1836562
+	GPUs = 0
+	Memory = 20000
+...
+006 (1129540.000.000) 2024-07-09 02:59:56 Image size of job updated: 108208
+	106  -  MemoryUsage of job (MB)
+	108208  -  ResidentSetSize of job (KB)
+...
+006 (1129540.000.000) 2024-07-09 03:04:57 Image size of job updated: 12680700
+	12379  -  MemoryUsage of job (MB)
+	12675532  -  ResidentSetSize of job (KB)
+...
+012 (1129540.000.000) 2024-07-09 04:00:02 Job was held.
+	too much request_memory: (RequestMemory - MemoryUsage) > 2048
+	Code 26 Subcode 0
+...
+013 (1129540.000.000) 2024-07-09 04:05:03 Job was released.
+	via condor_release (by user condor)
+...
+040 (1129540.000.000) 2024-07-09 05:06:08 Started transferring input files
+	Transferring to host: <155.230.21.137:9618?addrs=155.230.21.137-9618+[2407-c000-c024-0-da5e-d3ff-fe8f-f90e]-9618&alias=cluster337.knu.ac.kr&noUDP&sock=slot1_49_2906_4a2f_4838>
+...
+040 (1129540.000.000) 2024-07-09 05:06:08 Finished transferring input files
+...
+001 (1129540.000.000) 2024-07-09 05:06:09 Job executing on host: <155.230.21.137:9618?addrs=155.230.21.137-9618+[2407-c000-c024-0-da5e-d3ff-fe8f-f90e]-9618&alias=cluster337.knu.ac.kr&noUDP&sock=startd_2851_2099>
+	SlotName: slot1_49@cluster337.knu.ac.kr
+	CondorScratchDir = "/home/condor/dir_80888"
+	Cpus = 1
+	Disk = 3866684
+	Memory = 15700
+...
+009 (1129540.000.000) 2024-07-12 12:06:26 Job was aborted.
+	Job removed by SYSTEM_PERIODIC_REMOVE due to exceeded max walltime.
+...
