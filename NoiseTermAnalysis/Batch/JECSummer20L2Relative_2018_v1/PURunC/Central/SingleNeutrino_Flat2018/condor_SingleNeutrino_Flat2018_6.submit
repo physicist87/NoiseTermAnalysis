@@ -1,9 +1,0 @@
-# Unix submit description file
-Universe = vanilla
-Executable = ./JECSummer20L2Relative_2018_v1/PURunC/Central/SingleNeutrino_Flat2018_6.sh
-request_memory = 5000 
-should_transfer_files   = Yes
-Output      = ./JECSummer20L2Relative_2018_v1/PURunC/Central/SingleNeutrino_Flat2018/SingleNeutrino_Flat2018_6.output
-error       = ./JECSummer20L2Relative_2018_v1/PURunC/Central/SingleNeutrino_Flat2018/errors_SingleNeutrino_Flat2018_6.txt
-log         = ./JECSummer20L2Relative_2018_v1/PURunC/Central/SingleNeutrino_Flat2018/test_SingleNeutrino_Flat2018_6.log
-Queue 1

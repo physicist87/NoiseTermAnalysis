@@ -1,2 +1,0 @@
-SCRAM fatal: Unable to locate the top of local release. Please run this command from a SCRAM-based area.
-./NoiseTerm_Study: error while loading shared libraries: libvdt.so: cannot open shared object file: No such file or directory

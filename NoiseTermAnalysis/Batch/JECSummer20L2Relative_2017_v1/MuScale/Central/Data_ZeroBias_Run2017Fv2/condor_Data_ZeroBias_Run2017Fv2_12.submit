@@ -1,9 +1,0 @@
-# Unix submit description file
-Universe = vanilla
-Executable = ./JECSummer20L2Relative_2017_v1/MuScale/Central/Data_ZeroBias_Run2017Fv2_12.sh
-request_memory = 20000 
-should_transfer_files   = Yes
-Output      = ./JECSummer20L2Relative_2017_v1/MuScale/Central/Data_ZeroBias_Run2017Fv2/Data_ZeroBias_Run2017Fv2_12.output
-error       = ./JECSummer20L2Relative_2017_v1/MuScale/Central/Data_ZeroBias_Run2017Fv2/errors_Data_ZeroBias_Run2017Fv2_12.txt
-log         = ./JECSummer20L2Relative_2017_v1/MuScale/Central/Data_ZeroBias_Run2017Fv2/test_Data_ZeroBias_Run2017Fv2_12.log
-Queue 1
