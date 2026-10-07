@@ -1,0 +1,90 @@
+PROGRAM         = NoiseTerm_Study
+CC              = g++
+LD              = g++
+OPT             =
+
+# --- ROOT flags: use root-config instead of hardcoding $(ROOTSYS)/include ---
+# root-config --cflags resolves the right include path on every platform;
+# a hardcoded "-I$(ROOTSYS)/include" breaks on e.g. Homebrew ROOT on macOS,
+# which installs headers under include/root/ (not include/ directly) to
+# avoid clashing with other packages' generically-named headers.
+ROOTCFLAGS      = $(shell root-config --cflags)
+ROOTLIBS        = $(shell root-config --libs)
+ROOTGLIBS       = $(shell root-config --glibs)
+
+# --- correctionlib: 3-step fallback, same pattern as SSBNanoAODANCode's ---
+# --- Makefile_ssb (see noiseterm-correctionlib-pattern-reference.md)     ---
+# 1. CORR_ENV_INCLUDE/CORR_ENV_LIBPATH env vars, if set (manual override)
+# 2. the cvmfs LCG release build (lxplus/KNU cluster)
+# 3. a pip-installed correctionlib's own "correction config" command
+#    (typical for a laptop/macOS setup with no cvmfs - pip install
+#    correctionlib first)
+LCG_CORR_DIR    = /cvmfs/sft.cern.ch/lcg/releases/correctionlib/2.2.2-13853/x86_64-centos7-gcc11-opt
+ifdef CORR_ENV_INCLUDE
+CORRLIB_CFLAGS  = -I$(CORR_ENV_INCLUDE)
+CORRLIB_LDFLAGS = -L$(CORR_ENV_LIBPATH) -lcorrectionlib -Wl,-rpath,$(CORR_ENV_LIBPATH)
+else ifneq ("$(wildcard $(LCG_CORR_DIR)/include/correction.h)","")
+CORRLIB_CFLAGS  = -I$(LCG_CORR_DIR)/include
+CORRLIB_LDFLAGS = -L$(LCG_CORR_DIR)/lib -lcorrectionlib -Wl,-rpath,$(LCG_CORR_DIR)/lib
+else
+CORRLIB_CFLAGS  = $(shell correction config --cflags)
+CORRLIB_LDFLAGS = $(shell correction config --ldflags) $(shell correction config --rpath)
+endif
+
+CXXFLAGS        = -g -O2 $(ROOTCFLAGS) $(CORRLIB_CFLAGS) -std=c++17
+LIBS            = $(ROOTLIBS) $(CORRLIB_LDFLAGS)
+
+# --- X11 link flags: Linux/lxplus-only ---
+# ROOT's macOS build uses Cocoa, not X11 - "-lXext" has no target to link
+# against there and fails the build, so only add it on Linux.
+UNAME_S         := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+GLIBS           = $(ROOTGLIBS) -L/usr/X11R6/lib -lXext
+LDFLAGS         = $(LIBS) $(GLIBS) -B/usr/X11R6/lib -B/usr/lib64
+else
+GLIBS           = $(ROOTGLIBS)
+LDFLAGS         = $(LIBS) $(GLIBS)
+endif
+
+NOISETREE_INPUTS   = ./analysis/NoiseTree.C ./analysis/NoiseTree.h
+OBJS            = CommonTools.o NoiseTree.o NoiseTerm.o main_noiseterm.o LumiReWeight.o TextReader.o NoiseTermCorrections.o
+INPUTS	   	= $(NOISETREE_INPUTS) NoiseTerm.hpp NoiseTerm.cpp main_noiseterm.cpp ./LumiReWeighting.h ./LumiReWeighting.cc ./TextReader/TextReader.hpp ./TextReader/TextReader.cpp ./NoiseTermCorrections.hpp ./NoiseTermCorrections.cpp
+
+all: $(OBJS)
+	$(CC) $(OPT) $(LDFLAGS) -o $(PROGRAM) -g $(OBJS) $(LIBS)
+
+main_noiseterm.o: main_noiseterm.cpp $(INPUTS)
+	$(CC) $(CXXFLAGS) -c main_noiseterm.cpp
+
+NoiseTree.o: $(NOISETREE_INPUTS)
+	$(CC) $(CXXFLAGS) -c ./analysis/NoiseTree.C
+
+NoiseTerm.o: NoiseTerm.hpp NoiseTerm.cpp
+	$(CC) $(CXXFLAGS) -c ./NoiseTerm.cpp
+
+CommonTools.o: CommonTools.hpp CommonTools.cpp
+	$(CC) $(CXXFLAGS) -c CommonTools.cpp
+
+LumiReWeight.o: ./LumiReWeighting.h
+	$(CC) $(CXXFLAGS) -c ./LumiReWeighting.cc -o LumiReWeight.o
+
+TextReader.o: ./TextReader/TextReader.hpp ./TextReader/TextReader.cpp
+	$(CC) $(CXXFLAGS) -c TextReader/TextReader.cpp
+
+NoiseTermCorrections.o: ./NoiseTermCorrections.hpp ./NoiseTermCorrections.cpp ./TextReader/TextReader.hpp
+	$(CC) $(CXXFLAGS) -c ./NoiseTermCorrections.cpp
+
+clean:
+	-rm -f *~ $(OBJS) core core.*
+	-rm -rf ti_files
+	-rm -f $(PROGRAM)
+	-rm -f *~;
+
+distclean:
+	-rm -f *~ $(PROGRAM) $(OBJS)
+	-rm -rf ti_files
+
+run: $(PROGRAM) $(OBJS)
+	make all
+	./$(PROGRAM) 1
+

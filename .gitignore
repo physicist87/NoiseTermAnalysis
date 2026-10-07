@@ -1,0 +1,18 @@
+# Compiled objects / executables
+*.o
+NoiseTerm_Study
+PUProfile/PUProfile
+
+# Large analysis outputs
+output/
+Offset_MC_*.root
+
+# Archives
+*.zip
+
+# macOS
+.DS_Store
+
+# Temporary / editor files
+*~
+*.swp

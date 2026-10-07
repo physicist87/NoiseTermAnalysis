@@ -1,0 +1,48 @@
+PROGRAM         = PUProfile
+CC              = g++
+LD              = g++
+OPT             =
+
+# --- ROOT flags: use root-config instead of hardcoding $(ROOTSYS)/include ---
+# root-config --cflags resolves the right include path on every platform;
+# a hardcoded "-I$(ROOTSYS)/include" breaks on e.g. Homebrew ROOT on macOS,
+# which installs headers under include/root/ (not include/ directly) to
+# avoid clashing with other packages' generically-named headers.
+ROOTCFLAGS      = $(shell root-config --cflags)
+ROOTLIBS        = $(shell root-config --libs)
+ROOTGLIBS       = $(shell root-config --glibs)
+
+# No correctionlib dependency here - PUProfile only reads one branch and
+# fills one histogram, so it does not need NoiseTermCorrections at all.
+CXXFLAGS        = -g -O2 $(ROOTCFLAGS) -std=c++17
+LIBS            = $(ROOTLIBS)
+
+# --- X11 link flags: Linux/lxplus-only ---
+# ROOT's macOS build uses Cocoa, not X11 - "-lXext" has no target to link
+# against there and fails the build, so only add it on Linux.
+UNAME_S         := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+GLIBS           = $(ROOTGLIBS) -L/usr/X11R6/lib -lXext
+LDFLAGS         = $(LIBS) $(GLIBS) -B/usr/X11R6/lib -B/usr/lib64
+else
+GLIBS           = $(ROOTGLIBS)
+LDFLAGS         = $(LIBS) $(GLIBS)
+endif
+
+OBJS            = PUProfile.o
+
+all: $(OBJS)
+	$(CC) $(OPT) $(LDFLAGS) -o $(PROGRAM) -g $(OBJS) $(LIBS)
+
+PUProfile.o: PUProfile.cpp
+	$(CC) $(CXXFLAGS) -c PUProfile.cpp
+
+clean:
+	-rm -f *~ $(OBJS) core core.*
+	-rm -f $(PROGRAM)
+
+distclean:
+	-rm -f *~ $(PROGRAM) $(OBJS)
+
+run: $(PROGRAM)
+	./$(PROGRAM)
