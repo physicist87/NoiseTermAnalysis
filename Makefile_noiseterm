@@ -13,16 +13,23 @@ ROOTLIBS        = $(shell root-config --libs)
 ROOTGLIBS       = $(shell root-config --glibs)
 
 # --- correctionlib: 3-step fallback, same pattern as SSBNanoAODANCode's ---
-# --- Makefile_ssb (see noiseterm-correctionlib-pattern-reference.md)     ---
-# 1. CORR_ENV_INCLUDE/CORR_ENV_LIBPATH env vars, if set (manual override)
-# 2. the cvmfs LCG release build (lxplus/KNU cluster)
+# 1. env vars, if set (manual override). Both spellings are accepted:
+#      CORRECTION_PATH / CORRECTION_LIBPATH   (SSBNanoAODANCode naming)
+#      CORR_ENV_INCLUDE / CORR_ENV_LIBPATH    (old NoiseTerm naming, kept)
+# 2. the cvmfs LCG release build (KNU server / lxplus - needs cvmfs)
 # 3. a pip-installed correctionlib's own "correction config" command
-#    (typical for a laptop/macOS setup with no cvmfs - pip install
-#    correctionlib first)
+#    (Mac / laptop with no cvmfs:  pip install correctionlib)
+#
+# Server (cvmfs):  nothing to set - step 2 is picked up automatically.
+# Mac (pip):       nothing to set - step 3 is used (pip install correctionlib).
+# Custom install:  export CORRECTION_PATH=<dir>/include
+#                  export CORRECTION_LIBPATH=<dir>/lib
 LCG_CORR_DIR    = /cvmfs/sft.cern.ch/lcg/releases/correctionlib/2.2.2-13853/x86_64-centos7-gcc11-opt
-ifdef CORR_ENV_INCLUDE
-CORRLIB_CFLAGS  = -I$(CORR_ENV_INCLUDE)
-CORRLIB_LDFLAGS = -L$(CORR_ENV_LIBPATH) -lcorrectionlib -Wl,-rpath,$(CORR_ENV_LIBPATH)
+CORR_INC_ENV    = $(if $(CORRECTION_PATH),$(CORRECTION_PATH),$(CORR_ENV_INCLUDE))
+CORR_LIB_ENV    = $(if $(CORRECTION_LIBPATH),$(CORRECTION_LIBPATH),$(CORR_ENV_LIBPATH))
+ifneq ($(strip $(CORR_INC_ENV)),)
+CORRLIB_CFLAGS  = -I$(CORR_INC_ENV)
+CORRLIB_LDFLAGS = -L$(CORR_LIB_ENV) -lcorrectionlib -Wl,-rpath,$(CORR_LIB_ENV)
 else ifneq ("$(wildcard $(LCG_CORR_DIR)/include/correction.h)","")
 CORRLIB_CFLAGS  = -I$(LCG_CORR_DIR)/include
 CORRLIB_LDFLAGS = -L$(LCG_CORR_DIR)/lib -lcorrectionlib -Wl,-rpath,$(LCG_CORR_DIR)/lib

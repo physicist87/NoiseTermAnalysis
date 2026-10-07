@@ -16,3 +16,7 @@ Offset_MC_*.root
 # Temporary / editor files
 *~
 *.swp
+CondorJobs/condorSubmit/
+CondorJobs/condorLog/
+CondorJobs/*.tar.gz
+CondorJobs/bad_jobs_*.txt
