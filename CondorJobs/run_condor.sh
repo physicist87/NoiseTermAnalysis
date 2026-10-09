@@ -24,6 +24,12 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh || { echo "[ERROR] cvmfs setup faile
 scramv1 project CMSSW "${CMSSW_VER}" > /dev/null || { echo "[ERROR] scram project failed"; exit 1; }
 cd "${CMSSW_VER}/src" && eval "$(scramv1 runtime -sh)" && cd "${WORK_DIR}"
 
+# Fail fast if the SE is not reachable/authenticated from this worker
+# (needs use_x509userproxy = true in the JDL and a valid grid proxy at submit time).
+echo "X509_USER_PROXY=${X509_USER_PROXY:-<unset>}"
+xrdfs "${SE_HOST}" stat "${SE_BASE}" > /dev/null 2>&1 \
+   || { echo "[ERROR] SE preflight failed (${SE_HOST}${SE_BASE}); check grid proxy"; exit 1; }
+
 TARBALL="NoiseTermAnalysis.tar.gz"
 PKG="$(tar -tzf "${TARBALL}" | head -1 | cut -d/ -f1)"
 tar -xzf "${TARBALL}" || { echo "[ERROR] tar failed"; exit 1; }
@@ -36,10 +42,15 @@ make -f Makefile_noiseterm -j4 || { echo "[ERROR] build failed"; exit 1; }
 mkdir -p "input/${SAMPLE}" "output/${OUTDIR}"
 mv "${WORK_DIR}/${LISTNAME}" "input/${SAMPLE}/${LISTNAME}"
 
-./NoiseTerm_Study "${SAMPLE}/${LISTNAME}" "${OUTDIR}" "${OUTROOT}" "./configs/${STUDY}/${CFGREL}"
-RC=$?
+./NoiseTerm_Study "${SAMPLE}/${LISTNAME}" "${OUTDIR}" "${OUTROOT}" "./configs/${STUDY}/${CFGREL}" 2>&1 | tee run_analysis.log
+RC=${PIPESTATUS[0]}
 echo "=== [ANALYSIS DONE] rc=${RC} $(date) ==="
 [ ${RC} -eq 0 ] || exit ${RC}
+# An unreadable input list/auth problem still ends with rc=0 in the binary: treat 0 events as failure
+if grep -q "Total number of events after merging root files: 0$" run_analysis.log; then
+   echo "=== [ANALYSIS FAILED] 0 input events read ==="
+   exit 2
+fi
 
 # Output = one top-level file + one file per EtaBin dir; copy all, keep relative layout
 NFAIL=0

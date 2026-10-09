@@ -79,6 +79,7 @@ def write_jdl(args, key, cfgrel, sample, jobs):
             f"Arguments  = \"{args.study} {cfgrel} {cfgdir} {sample} $(InputListName)\"\n"
             "getenv     = False\n"
             f"environment = \"SE_HOST={args.se_host} SE_BASE={args.se_base}\"\n"
+            "use_x509userproxy      = true\n"
             "should_transfer_files   = YES\n"
             "when_to_transfer_output = ON_EXIT\n"
             f"transfer_input_files    = {TARBALL},$(InputListPath)\n"
@@ -89,7 +90,7 @@ def write_jdl(args, key, cfgrel, sample, jobs):
             "RequestCpus   = 1\n"
             "RequestMemory = 8 GB\n"
             "RequestDisk   = 10 GB\n"
-            "+JobType      = \"short\"\n"
+            "+JobType      = \"long\"\n"
             f"Queue JobId, InputListPath, InputListName from {queue}\n"
         )
     return jdl
