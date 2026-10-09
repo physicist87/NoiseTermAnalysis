@@ -87,7 +87,7 @@ def write_jdl(args, key, cfgrel, sample, jobs):
             f"Output = {log_dir}/{sample}_$(JobId).out\n"
             f"Error  = {log_dir}/{sample}_$(JobId).err\n"
             "RequestCpus   = 1\n"
-            "RequestMemory = 4 GB\n"
+            "RequestMemory = 8 GB\n"
             "RequestDisk   = 10 GB\n"
             "+JobType      = \"short\"\n"
             f"Queue JobId, InputListPath, InputListName from {queue}\n"

@@ -364,8 +364,10 @@ void NoiseTerm::DeclareHistos(int index)
       h_RC_Del_phi[index][i] = new TH1D(Form("h_RC_Del_phi_%d",i+1), Form("#Delta #phi between RC1 and RC2 (%s); |#Delta #phi|", npustr.Data()), 315, 0, 3.15);   h_RC_Del_phi[index][i]->Sumw2();
       h_RC_Del_eta[index][i] = new TH1D(Form("h_RC_Del_eta_%d",i+1), Form("#Delta #eta between RC1 and RC2 (%s); #Delta #eta", npustr.Data()), 140, -5.2, 5.2);   h_RC_Del_eta[index][i]->Sumw2();
       //h_RC_Phi1vsPhi2[index][i] = new TH2D(Form("h_RC_Phi1vsPhi2_%d",i+1),Form("Dist. #phi of RC1 vs RC2 (%s)", npustr.Data()),100,-1*pi,pi,100,-1*pi,pi); h_RC_Phi1vsPhi2[index][i]->Sumw2();
-      h_RC_Phi1vsPhi2[index][i] = new TH2D(Form("h_RC_Phi1vsPhi2_%d",i+1),Form("Dist. #phi of RC1 vs RC2 (%s)", npustr.Data()),640,-3.2,3.2,640,-3.2,3.2); h_RC_Phi1vsPhi2[index][i]->Sumw2();
-      h_RC_Eta1vsEta2[index][i] = new TH2D(Form("h_RC_Eta1vsEta2_%d",i+1),Form("Dist. #eta of RC1 vs RC2 (%s)", npustr.Data()),1400,-5.2,5.2,1400,-5.2,5.2); h_RC_Eta1vsEta2[index][i]->Sumw2();
+      // h_RC_Phi1vsPhi2 / h_RC_Eta1vsEta2 are never filled; keep them (same names) but with 1x1 bins.
+      // At full binning they cost ~38 MB each per (eta bin, PU bin), i.e. ~6.5 GB per job.
+      h_RC_Phi1vsPhi2[index][i] = new TH2D(Form("h_RC_Phi1vsPhi2_%d",i+1),Form("Dist. #phi of RC1 vs RC2 (%s)", npustr.Data()),1,-3.2,3.2,1,-3.2,3.2); h_RC_Phi1vsPhi2[index][i]->Sumw2();
+      h_RC_Eta1vsEta2[index][i] = new TH2D(Form("h_RC_Eta1vsEta2_%d",i+1),Form("Dist. #eta of RC1 vs RC2 (%s)", npustr.Data()),1,-5.2,5.2,1,-5.2,5.2); h_RC_Eta1vsEta2[index][i]->Sumw2();
       h_Noise_DiffvsRCpt1[index][i] = new TH2D(Form("h_Noise_DiffvsRCpt1_%d",i+1),Form("Noise Term vs  (%s); p_{T} RC1 - p_{T} RC2; p_{T} RC1", npustr.Data()),1000,-50,50,400, -200, 200); h_Noise_DiffvsRCpt1[index][i]->Sumw2();
       h_Noise_DiffvsRCpt2[index][i] = new TH2D(Form("h_Noise_DiffvsRCpt2_%d",i+1),Form("Noise Term vs  (%s); p_{T} RC1 - p_{T} RC2; p_{T} RC2", npustr.Data()),1000,-50,50,400, -200, 200); h_Noise_DiffvsRCpt2[index][i]->Sumw2();
    }
