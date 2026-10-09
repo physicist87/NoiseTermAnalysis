@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "TMath.h"
+#include "TVector2.h"
 #include "TH2.h"
 #include "TStyle.h"
 #include "TCanvas.h"
@@ -544,6 +545,11 @@ RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
    // its usePuppiWsumCut mode.
    const double kWeightSumCut = 0.0001;
 
+   // Loop invariants hoisted out of the per-PF loop.
+   const bool isCHS   = (JetType_ == "AK4PFchs");
+   const bool isPuppi = (JetType_ == "AK4PFPuppi");
+   const double RCone2 = RCone * RCone;
+
    while ((isPFInCone1 == false || isPFInCone2 == false) && NumOfSelct < maxSelct)
    {
       NumOfSelct++;
@@ -587,17 +593,30 @@ RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
 
       for (unsigned int i = 0; i < pf_pt->size(); i++)
       {
-         bool passCHS = (JetType_ == "AK4PFchs") ? IsPFCHS(pf_type->at(i)) : true;
-         if (JetType_ == "AK4PFchs" && !passCHS){continue;}
+         if (isCHS && !IsPFCHS(pf_type->at(i))) { continue; }
+
+         // Cone membership from plain dEta/dPhi arithmetic on the stored PF
+         // eta/phi. Equivalent to TLorentzVector::DeltaR() < RCone, without
+         // rebuilding a four-vector (sinh/cos/sin) and recomputing eta/phi
+         // (log/atan2) for every PF candidate and cone.
+         double dEta1 = pf_eta->at(i) - eta1;
+         double dPhi1 = TVector2::Phi_mpi_pi(pf_phi->at(i) - phi1);
+         double dEta2 = pf_eta->at(i) - eta2;
+         double dPhi2 = TVector2::Phi_mpi_pi(pf_phi->at(i) - phi2);
+
+         bool inCone1 = (dEta1 * dEta1 + dPhi1 * dPhi1 < RCone2);
+         bool inCone2 = (dEta2 * dEta2 + dPhi2 * dPhi2 < RCone2);
+
+         if (!inCone1 && !inCone2) { continue; }
 
          clusterVectorE.SetPtEtaPhiE(pf_pt->at(i), pf_eta->at(i), pf_phi->at(i), pf_energy->at(i));
 
-         double weight = (JetType_ == "AK4PFPuppi") ? pf_puppiW->at(i) : 1.0;
+         double weight = isPuppi ? pf_puppiW->at(i) : 1.0;
 
          bool tempInCone1 = false;
          bool tempInCone2 = false;
 
-         if (fabs(rndmCone1.DeltaR(clusterVectorE)) < RCone)
+         if (inCone1)
          {
             SumRCone1 = SumRCone1 + clusterVectorE;
             tempInCone1 = true;
@@ -607,7 +626,7 @@ RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
             num_rc1_pf++;
          }
 
-         if (fabs(rndmCone2.DeltaR(clusterVectorE)) < RCone)
+         if (inCone2)
          {
             SumRCone2 = SumRCone2 + clusterVectorE;
             tempInCone2 = true;
