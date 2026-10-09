@@ -28,6 +28,8 @@
 #include <algorithm>
 //#include <boost/shared_ptr.hpp>
 #include "LumiReWeighting.h"
+#include <stdexcept>
+#include <iostream>
 /*#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -55,6 +57,16 @@ LumiReWeighting::LumiReWeighting( std::string generatedFile,
 
 	Data_distr_ = static_cast<TH1*>(dataFile_->Get( DataHistName_.c_str() )->Clone() );
 	MC_distr_ = static_cast<TH1*>(generatedFile_->Get( GenHistName_.c_str() )->Clone() );
+
+	// Refuse to run with mismatched binning: TH1::Divide only prints an error
+	// and leaves the weights wrong, which would silently bias every result.
+	if ( Data_distr_->GetNbinsX() != MC_distr_->GetNbinsX() ||
+	     Data_distr_->GetXaxis()->GetXmax() != MC_distr_->GetXaxis()->GetXmax() ) {
+	  std::cerr << "[LumiReWeighting] ERROR: binning mismatch: data " << Data_distr_->GetNbinsX()
+	            << " bins (max " << Data_distr_->GetXaxis()->GetXmax() << ") vs MC " << MC_distr_->GetNbinsX()
+	            << " bins (max " << MC_distr_->GetXaxis()->GetXmax() << ")" << std::endl;
+	  throw std::runtime_error("LumiReWeighting: data and MC pileup histograms have different binning");
+	}
 
 	// MC * data/MC = data, so the weights are data/MC:
 
