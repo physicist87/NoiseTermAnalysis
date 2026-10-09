@@ -42,7 +42,7 @@ make -f Makefile_noiseterm -j4 || { echo "[ERROR] build failed"; exit 1; }
 mkdir -p "input/${SAMPLE}" "output/${OUTDIR}"
 mv "${WORK_DIR}/${LISTNAME}" "input/${SAMPLE}/${LISTNAME}"
 
-./NoiseTerm_Study "${SAMPLE}/${LISTNAME}" "${OUTDIR}" "${OUTROOT}" "./configs/${STUDY}/${CFGREL}" 2>&1 | tee run_analysis.log
+stdbuf -oL ./NoiseTerm_Study "${SAMPLE}/${LISTNAME}" "${OUTDIR}" "${OUTROOT}" "./configs/${STUDY}/${CFGREL}" 2>&1 | tee run_analysis.log
 RC=${PIPESTATUS[0]}
 echo "=== [ANALYSIS DONE] rc=${RC} $(date) ==="
 [ ${RC} -eq 0 ] || exit ${RC}
