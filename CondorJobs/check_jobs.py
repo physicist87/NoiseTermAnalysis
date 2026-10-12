@@ -27,6 +27,43 @@ def xrd_ls(host, path):
     return [line.rsplit("/", 1)[-1] for line in r.stdout.split() if line.strip()]
 
 
+_size_cache = {}
+
+
+def dir_sizes(host, path):
+    """basename -> size in bytes for every file under an SE dir (None if the dir cannot be listed)."""
+    if path not in _size_cache:
+        r = subprocess.run(["xrdfs", host, "ls", "-l", path], capture_output=True, text=True)
+        if r.returncode != 0:
+            _size_cache[path] = None
+        else:
+            d = {}
+            for line in r.stdout.splitlines():
+                t = line.split()
+                if len(t) >= 5 and t[3].isdigit():
+                    d[t[-1].rsplit("/", 1)[-1]] = int(t[3])
+            _size_cache[path] = d
+    return _size_cache[path]
+
+
+def is_empty_input(host, listpath, max_size):
+    """True if every input file of the list exists and is smaller than max_size (empty ntuples, no events)."""
+    n = 0
+    for line in Path(listpath).read_text().splitlines():
+        p = line.strip()
+        if not p:
+            continue
+        parts = p.split("//")
+        if len(parts) < 3:
+            return False
+        d, fn = os.path.split("/" + parts[2])
+        sizes = dir_sizes(host, d)
+        if sizes is None or fn not in sizes or sizes[fn] >= max_size:
+            return False
+        n += 1
+    return n > 0
+
+
 def queued_set():
     """(cfgrel, listname) of jobs still in the queue (idle/running/held)."""
     r = subprocess.run(["condor_q", "-allusers", "-af", "Arguments"], capture_output=True, text=True)
@@ -47,14 +84,16 @@ def main():
     ap.add_argument("--se-base", default=os.environ.get("SE_BASE", DEFAULT_SE_BASE))
     ap.add_argument("--skip-queued", action="store_true", help="do not report lists that are still in the condor queue")
     ap.add_argument("--write-bad", help="write KEY|SAMPLE|LISTPATH lines for submit_jobs.py --bad-jobs")
+    ap.add_argument("--empty-size", type=int, default=100000,
+                    help="lists whose input files are all smaller than this (bytes) count as empty input, not as failures")
     ap.add_argument("--show", type=int, default=10, help="max bad list names printed per sample")
     args = ap.parse_args()
 
     queued = queued_set() if args.skip_queued else set()
     base = Path(args.input_base)
-    bad_lines, tot_exp, tot_ok = [], 0, 0
+    bad_lines, tot_exp, tot_ok, tot_empty = [], 0, 0, 0
 
-    print(f"{'key':8s} {'sample':28s} {'expected':>8s} {'complete':>8s} {'missing':>7s} {'partial':>7s} {'queued':>6s}")
+    print(f"{'key':8s} {'sample':28s} {'expected':>8s} {'complete':>8s} {'missing':>7s} {'partial':>7s} {'queued':>6s} {'empty':>6s}")
     for key, group, cfgrel, samples in ENTRIES:
         if not any(s in ("all", key, group) for s in args.samples):
             continue
@@ -70,7 +109,7 @@ def main():
             have_top = {n for n in top if n.endswith(".root")}
             per_eta = {d: set(xrd_ls(args.se_host, f"{sdir}/{d}") or []) for d in etadirs}
 
-            n_ok = n_miss = n_part = n_q = 0
+            n_ok = n_miss = n_part = n_q = n_empty = 0
             bad_names = []
             for lp in lists:
                 fn = lp.stem + ".root"
@@ -80,6 +119,9 @@ def main():
                 if args.skip_queued and (cfgrel, lp.name) in queued:
                     n_q += 1
                     continue
+                if not (fn in have_top) and is_empty_input(args.se_host, lp, args.empty_size):
+                    n_empty += 1
+                    continue
                 if fn in have_top or any(fn in per_eta[d] for d in etadirs):
                     n_part += 1
                 else:
@@ -88,12 +130,13 @@ def main():
                 bad_lines.append(f"{key}|{sample}|{lp}")
             tot_exp += len(lists)
             tot_ok += n_ok
-            print(f"{key:8s} {sample:28s} {len(lists):8d} {n_ok:8d} {n_miss:7d} {n_part:7d} {n_q:6d}")
+            tot_empty += n_empty
+            print(f"{key:8s} {sample:28s} {len(lists):8d} {n_ok:8d} {n_miss:7d} {n_part:7d} {n_q:6d} {n_empty:6d}")
             if bad_names:
                 shown = ", ".join(bad_names[:args.show]) + (" ..." if len(bad_names) > args.show else "")
                 print(f"           bad: {shown}")
 
-    print(f"TOTAL expected={tot_exp} complete={tot_ok} not complete={tot_exp - tot_ok} (to resubmit: {len(bad_lines)})")
+    print(f"TOTAL expected={tot_exp} complete={tot_ok} empty-input={tot_empty} (to resubmit: {len(bad_lines)})")
     if args.write_bad:
         Path(args.write_bad).write_text("\n".join(bad_lines) + ("\n" if bad_lines else ""))
         print(f"wrote {len(bad_lines)} line(s) to {args.write_bad}")
