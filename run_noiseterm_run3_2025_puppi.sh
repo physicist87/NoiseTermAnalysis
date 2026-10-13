@@ -37,7 +37,7 @@
 set -e
 cd "$(dirname "$0")"
 
-TAG="Run3_2025_PUPPI_v1"
+TAG="Run3_2025_PUPPI_v2"
 EXE="./NoiseTerm_Study"
 
 # KEY | GROUP | config path (relative to configs/${TAG}/) | input samples (comma separated)

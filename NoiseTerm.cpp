@@ -172,6 +172,10 @@ void NoiseTerm::Loop()
          FillHisto(h_Num_pf_RC1[i][nidx], v_rc1jet_numpf.at(i), evtWeight);
          FillHisto(h_Num_pf_RC2[i][nidx], v_rc2jet_numpf.at(i), evtWeight);
          FillHisto(h_Noise_Diff[i][nidx], diff_, evtWeight);
+         // split by cone pT (both pT values include the JEC factor, like diff_)
+         const double splitPtCut = 5.0;
+         const int splitCat = (v_rc1jet_pt.at(i)*jec_rc1 >= splitPtCut ? 2 : 0) + (v_rc2jet_pt.at(i)*jec_rc2 >= splitPtCut ? 1 : 0);
+         FillHisto(h_Noise_Diff_cat[i][nidx][splitCat], diff_, evtWeight);
          FillHisto(h_Noise_Rho_Diff[i][ridx], diff_, evtWeight);
          FillHisto(h_Noise_Avg[i][nidx], avg_, evtWeight);
          FillHisto(h_Debug_Phi1[i][nidx],v_rc1jet_phi.at(i), evtWeight);
@@ -215,6 +219,7 @@ void NoiseTerm::Loop()
          FillHisto(h_RC2_Cor[i][8],jec_rc2, evtWeight);
 
          FillHisto(h_Noise_Diff[i][8], diff_, evtWeight);
+         FillHisto(h_Noise_Diff_cat[i][8][splitCat], diff_, evtWeight);
          FillHisto(h_Noise_Rho_Diff[i][8], diff_, evtWeight);
          FillHisto(h_Noise_Avg[i][8], avg_, evtWeight);
          FillHisto(h_Debug_Phi1[i][8],v_rc1jet_phi.at(i), evtWeight);
@@ -325,6 +330,9 @@ void NoiseTerm::DeclareHistos(int index)
       //h_PF_energy[index][i] = new TH1D(Form("h_PF_energy_%d",i+1), Form("Energy of PF (%s); Energy (GeV)", npustr.Data()), 10000, 0, 100);   h_PF_energy[index][i]->Sumw2();
       h_Noise_Diff[index][i] = new TH1D(Form("h_Noise_Diff_%d",i+1),Form("h_Nmise_Diff (%s);pT RC1 - pT RC2", npustr.Data()),10000,-50,50); h_Noise_Diff[index][i]->Sumw2();
       h_Noise_Rho_Diff[index][i] = new TH1D(Form("h_Noise_Rho_Diff_%d",i+1),Form("h_Nmise_Diff (%s);pT RC1 - pT RC2", rhostr.Data()),10000,-50,50); h_Noise_Rho_Diff[index][i]->Sumw2();
+      for (int k = 0; k < 4; ++k) {
+         h_Noise_Diff_cat[index][i][k] = new TH1D(Form("h_Noise_Diff_cat%d_%d",k+1,i+1),Form("h_Noise_Diff cat%d (%s);pT RC1 - pT RC2", k+1, npustr.Data()),10000,-50,50); h_Noise_Diff_cat[index][i][k]->Sumw2();
+      }
       h_Noise_Avg[index][i] = new TH1D(Form("h_Noise_Avg_%d",i+1),Form("h_Nmise_Avg (%s);pT (RC1 + pT RC2)/2", npustr.Data()),10000,-50,50); h_Noise_Avg[index][i]->Sumw2();
       //cout << "In DeclareHistos " << h_Noise_Avg[index][i] ->GetName() << endl;
       //h_Debug_Phi1[index][i] = new TH1D(Form("h_Debug_Phi1_%d",i+1),Form("Dist. #phi of RC1 (%s)", npustr.Data()),100,-1*pi,pi); h_Debug_Phi1[index][i]->Sumw2();

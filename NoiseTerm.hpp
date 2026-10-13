@@ -133,6 +133,9 @@ class NoiseTerm : public NoiseTree
       TH1D *h_Noise_Diff[20][9];
       TH1D *h_Noise_Rho_Diff[20][9];
       TH1D *h_Noise_Avg[20][9];
+      // Delta pT split by the pT of the two cones (cut splitPtCut): cat1 = both below, cat2 = RC1 below / RC2 above,
+      // cat3 = RC1 above / RC2 below, cat4 = both above. Index [eta bin][nPU bin][category 0..3].
+      TH1D *h_Noise_Diff_cat[20][9][4];
 
       TH1D *h_Debug_Phi1[20][9];
       TH1D *h_Debug_Phi2[20][9];
