@@ -11,6 +11,30 @@ bool DirExists(const std::string& path) {
    return (info.st_mode & S_IFDIR) != 0;
 }
 
+// Build the evaluate() argument vector by matching each input's NAME
+// (JetA/JetEta/JetPt/Rho/JetPhi/run) rather than a fixed position or count.
+template <class Inputs>
+std::vector<correction::Variable::Type> BuildArgs(const Inputs& inputs, double pt, double eta, double phi,
+                                                  double area, double rho, unsigned int run_number) {
+   std::vector<correction::Variable::Type> args;
+   args.reserve(inputs.size());
+   for (const auto& var : inputs) {
+      const std::string& n = var.name();
+      if      (n == "JetA")   args.push_back(area);
+      else if (n == "JetEta") args.push_back(eta);
+      else if (n == "JetPt")  args.push_back(pt);
+      else if (n == "Rho")    args.push_back(rho);
+      else if (n == "JetPhi") args.push_back(phi);
+      else if (n == "run")    args.push_back(static_cast<double>(run_number));
+      else {
+         std::cout << "[NoiseTermCorrections] WARNING: unrecognized JEC input \"" << n
+                   << "\", passing 0.0 - check against the actual json schema" << std::endl;
+         args.push_back(0.0);
+      }
+   }
+   return args;
+}
+
 } // namespace
 
 NoiseTermCorrections::NoiseTermCorrections(TextReader* reader)
@@ -23,25 +47,63 @@ NoiseTermCorrections::NoiseTermCorrections(TextReader* reader)
    std::string jvetoPath = reader->GetText("JetVetoPath");
    std::string jvetoName = reader->GetText("JetVetoName");
    jvetoKey_ = reader->GetText("JetVetoKey");
+   jecLevel_ = reader->GetText("JECLevel");
 
-   // --- JEC (compound correction: L1FastJet+L2Relative+L3Absolute, +
-   // L2L3Residual for DATA - already combined in the json, see
-   // configs/Run3_2025_PUPPI_v1/) ---
    jecSet_ = correction::CorrectionSet::from_file(jsonDir_ + jecPath);
-   const auto& compoundMap = jecSet_->compound();
-   auto jecIt = compoundMap.find(jecName);
-   if (jecIt == compoundMap.end()) {
-      std::cout << "[NoiseTermCorrections] ERROR: compound correction \"" << jecName
-                << "\" not found in " << (jsonDir_ + jecPath) << std::endl;
+
+   // --- Per-level JEC ---
+   // JECLevel (config): "L2L3" (default) or "L1L2L3". A trailing "Res"
+   // ("L2L3Res", "L1L2L3Res") additionally applies L2L3Residual.
+   // L1FastJet subtracts the pileup offset (rho*area), which is the very
+   // quantity the noise term measures, so the default leaves it out.
+   // Level names are derived from the compound name by replacing
+   // "L1L2L3Res": <prefix>_L1L2L3Res_<suffix> -> <prefix>_L2Relative_<suffix>, ...
+   bool useL1 = false, useRes = false;
+   if (jecLevel_.empty()) {
+      jecLevel_ = "L2L3";
+   } else if (jecLevel_ == "L2L3") {
+   } else if (jecLevel_ == "L1L2L3") {
+      useL1 = true;
+   } else if (jecLevel_ == "L2L3Res") {
+      useRes = true;
+   } else if (jecLevel_ == "L1L2L3Res") {
+      useL1 = true; useRes = true;
    } else {
-      jec_ = jecIt->second;
+      std::cout << "[NoiseTermCorrections] WARNING: unknown JECLevel \"" << jecLevel_
+                << "\", using L2L3" << std::endl;
+      jecLevel_ = "L2L3";
    }
 
-   if (jec_) {
-      std::cout << "[NoiseTermCorrections] JEC: " << jecName << " - inputs (" << jec_->inputs().size() << "): ";
-      for (const auto& var : jec_->inputs()) std::cout << var.name() << " ";
-      std::cout << std::endl;
+   const std::string tok = "_L1L2L3Res_";
+   const size_t pos = jecName.find(tok);
+   if (pos == std::string::npos) {
+      std::cout << "[NoiseTermCorrections] ERROR: JECName \"" << jecName
+                << "\" does not contain \"" << tok << "\", cannot derive per-level names" << std::endl;
+   } else {
+      const std::string prefix = jecName.substr(0, pos);
+      const std::string suffix = jecName.substr(pos + tok.size());
+      std::vector<std::string> levels;
+      if (useL1) levels.push_back("L1FastJet");
+      levels.push_back("L2Relative");
+      levels.push_back("L3Absolute");
+      if (useRes) levels.push_back("L2L3Residual");
+      for (const auto& lv : levels) {
+         const std::string cname = prefix + "_" + lv + "_" + suffix;
+         bool found = false;
+         for (auto it = jecSet_->begin(); it != jecSet_->end(); ++it) {
+            if (it->first == cname) { jecSteps_.push_back(it->second); found = true; break; }
+         }
+         if (!found) {
+            std::cout << "[NoiseTermCorrections] ERROR: correction \"" << cname << "\" not found" << std::endl;
+         } else {
+            std::cout << "[NoiseTermCorrections] JEC step: " << cname << " - inputs: ";
+            for (const auto& var : jecSteps_.back()->inputs()) std::cout << var.name() << " ";
+            std::cout << std::endl;
+         }
+      }
    }
+   std::cout << "[NoiseTermCorrections] JECLevel " << jecLevel_ << ": " << jecSteps_.size()
+             << " step(s), L1FastJet " << (useL1 ? "APPLIED" : "NOT applied") << std::endl;
 
    // --- Jet veto map ---
    jvetoSet_ = correction::CorrectionSet::from_file(jsonDir_ + jvetoPath);
@@ -92,35 +154,17 @@ std::string NoiseTermCorrections::ResolveJsonDir() const {
 
 double NoiseTermCorrections::GetCorrectedJetPt(double raw_pt, double eta, double phi, double area, double rho,
                                                 unsigned int run_number) const {
-   if (!jec_) return raw_pt; // not loaded - no-op rather than a hard crash
-
-   // Build the evaluate() argument vector by matching each input's NAME
-   // (JetA/JetEta/JetPt/Rho/JetPhi/run) rather than assuming a fixed
-   // position or count. Verified necessary against the real
-   // Summer24Prompt25_V3 jet_jerc.json.gz: DATA needs 6 inputs including
-   // JetPhi and run, MC needs 5 (no run) but still needs JetPhi - neither
-   // matches the older 4/5-input {area,eta,pt,rho[,run]} pattern used by
-   // some earlier (e.g. Run2 UL18) campaigns, so this must not be
-   // hardcoded positionally.
-   std::vector<correction::Variable::Type> args;
-   args.reserve(jec_->inputs().size());
-   for (const auto& var : jec_->inputs()) {
-      const std::string& n = var.name();
-      if      (n == "JetA")   args.push_back(area);
-      else if (n == "JetEta") args.push_back(eta);
-      else if (n == "JetPt")  args.push_back(raw_pt);
-      else if (n == "Rho")    args.push_back(rho);
-      else if (n == "JetPhi") args.push_back(phi);
-      else if (n == "run")    args.push_back(static_cast<double>(run_number));
-      else {
-         std::cout << "[NoiseTermCorrections] WARNING: unrecognized JEC input \"" << n
-                   << "\", passing 0.0 - check GetCorrectedJetPt() against the actual json schema"
-                   << std::endl;
-         args.push_back(0.0);
+   // Sequential, each level evaluated at the pt after the previous levels,
+   // like a compound correction.
+   if (!jecSteps_.empty()) {
+      double pt = raw_pt;
+      for (const auto& step : jecSteps_) {
+         pt *= step->evaluate(BuildArgs(step->inputs(), pt, eta, phi, area, rho, run_number));
       }
+      return pt;
    }
-   double sf = jec_->evaluate(args);
-   return raw_pt * sf;
+
+   return raw_pt; // no JEC step loaded - no-op rather than a hard crash
 }
 
 bool NoiseTermCorrections::ShouldVetoJet(double eta, double phi) const {

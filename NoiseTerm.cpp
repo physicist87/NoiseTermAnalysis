@@ -85,7 +85,7 @@ void NoiseTerm::Loop()
       FillHisto(h_NPV[nidx],NPV_, evtWeight);
       FillHisto(h_Mu[8],mu, evtWeight);
       FillHisto(h_NPV[8],NPV_, evtWeight);
-      // JEC (L1FastJet+L2Relative+L3Absolute(+L2L3Residual for DATA)) and
+      // JEC (L2Relative+L3Absolute(+L2L3Residual for DATA), no L1FastJet) and
       // the jet veto map are both applied via NoiseTermCorrections
       // (correctionlib) below, per-random-cone - see GetCorrectedJetPt()/
       // ShouldVetoJet() calls further down. Replaces the old per-event
