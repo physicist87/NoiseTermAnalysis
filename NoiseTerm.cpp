@@ -96,6 +96,7 @@ void NoiseTerm::Loop()
       vector<float> v_rc2jet_eta, v_rc2jet_phi, v_rc2jet_pt, v_rc2jet_energy;
       vector<float> v_rc_diff;
       std::vector<bool> v_isRC;
+      std::vector<RandCone> v_rcinfo;
  
       v_rc1jet_numpf.clear();
       v_rc1jet_eta.clear();
@@ -108,6 +109,7 @@ void NoiseTerm::Loop()
       v_rc2jet_pt.clear();
       v_rc2jet_energy.clear();
       v_isRC.clear();
+      v_rcinfo.clear();
       v_rc_diff.clear();
       vector<double> vEtaBins = {0,0.261, 0.522, 0.783, 1.044, 1.305, 1.566, 1.740, 1.930, 2.043, 2.172, 2.322, 2.500, 2.650, 2.853, 2.964, 3.139, 3.489, 3.839, 5.191};
       //cout << "jentry : " << jentry  << endl;
@@ -122,6 +124,7 @@ void NoiseTerm::Loop()
             tmp = SetRandomCone(vEtaBins[etabinIndex+1],vEtaBins[etabinIndex]);
             /// RC information ///
             v_isRC.push_back(tmp.findRC);
+            v_rcinfo.push_back(tmp);
             v_rc_diff.push_back(tmp.diff_);
             v_rc1jet_numpf.push_back(tmp.num_pfcan_rc1);
             v_rc1jet_eta.push_back(tmp.rc1.Eta());
@@ -236,6 +239,10 @@ void NoiseTerm::Loop()
 
          FillHisto(h_Noise_DiffvsRCpt1[i][8], diff_, v_rc1jet_pt.at(i)*jec_rc1,evtWeight);
          FillHisto(h_Noise_DiffvsRCpt2[i][8], diff_, v_rc2jet_pt.at(i)*jec_rc2,evtWeight);
+
+         // PF-type / HCAL-depth decomposition (Mikko stages 2-4); same JEC factors as the total.
+         FillPFTypeHistos(i, nidx, v_rcinfo.at(i), jec_rc1, jec_rc2, evtWeight);
+         FillPFTypeHistos(i, 8,    v_rcinfo.at(i), jec_rc1, jec_rc2, evtWeight);
       }
 
       //cout << "genjet_pt->size() " << genjet_pt->size() << endl;
@@ -377,8 +384,79 @@ void NoiseTerm::DeclareHistos(int index)
       h_RC_Phi1vsPhi2[index][i] = new TH2D(Form("h_RC_Phi1vsPhi2_%d",i+1),Form("Dist. #phi of RC1 vs RC2 (%s)", npustr.Data()),1,-3.2,3.2,1,-3.2,3.2); h_RC_Phi1vsPhi2[index][i]->Sumw2();
       h_RC_Eta1vsEta2[index][i] = new TH2D(Form("h_RC_Eta1vsEta2_%d",i+1),Form("Dist. #eta of RC1 vs RC2 (%s)", npustr.Data()),1,-5.2,5.2,1,-5.2,5.2); h_RC_Eta1vsEta2[index][i]->Sumw2();
       h_Noise_DiffvsRCpt1[index][i] = new TH2D(Form("h_Noise_DiffvsRCpt1_%d",i+1),Form("Noise Term vs  (%s); p_{T} RC1 - p_{T} RC2; p_{T} RC1", npustr.Data()),1000,-50,50,400, -200, 200); h_Noise_DiffvsRCpt1[index][i]->Sumw2();
+      BookPFTypeHistos(index, i, npustr);
       h_Noise_DiffvsRCpt2[index][i] = new TH2D(Form("h_Noise_DiffvsRCpt2_%d",i+1),Form("Noise Term vs  (%s); p_{T} RC1 - p_{T} RC2; p_{T} RC2", npustr.Data()),1000,-50,50,400, -200, 200); h_Noise_DiffvsRCpt2[index][i]->Sumw2();
    }
+}
+
+static const char* kGrpName[kNGrp + 1] = {"CH", "NH", "PH", "HFH", "HFE", "OTH", "ALL"};
+static const char* kMName[2] = {"Puppi", "Raw"};
+static const int kPairA[kNPair] = {gCH, gCH, gNH, gHFH};
+static const int kPairB[kNPair] = {gNH, gPH, gPH, gHFE};
+
+void NoiseTerm::BookPFTypeHistos(int index, int i, const TString &npustr)
+{
+   for (int m = 0; m < 2; ++m) {
+      for (int g = 0; g <= kNGrp; ++g) {
+         h_dPT_grp[index][i][g][m] = new TH1D(Form("h_d%s_%s_%d", kMName[m], kGrpName[g], i+1),
+            Form("dPT RC1-RC2 %s %s (%s); dPT", kMName[m], kGrpName[g], npustr.Data()), 1000, -50, 50);
+         h_dPT_grp[index][i][g][m]->Sumw2();
+         h_ET_grp[index][i][g][m] = new TH1D(Form("h_ET%s_%s_%d", kMName[m], kGrpName[g], i+1),
+            Form("cone ET %s %s (%s); ET", kMName[m], kGrpName[g], npustr.Data()), 500, 0, 50);
+         h_ET_grp[index][i][g][m]->Sumw2();
+         p_d2VsAvg_grp[index][i][g][m] = new TProfile(Form("p_d2VsAvg%s_%s_%d", kMName[m], kGrpName[g], i+1),
+            Form("<dPT^2> vs mean ET %s %s (%s); (ET1+ET2)/2; <dPT^2>", kMName[m], kGrpName[g], npustr.Data()), 60, 0, 30);
+      }
+      for (int k = 0; k < kNDepth; ++k) {
+         h_dPT_depth[index][i][k][m] = new TH1D(Form("h_d%s_Depth%d_%d", kMName[m], k+1, i+1),
+            Form("dPT RC1-RC2 %s HCAL depth %d (%s); dPT", kMName[m], k+1, npustr.Data()), 1000, -50, 50);
+         h_dPT_depth[index][i][k][m]->Sumw2();
+      }
+      for (int p = 0; p < kNPair; ++p) {
+         h2_dPT_pair[index][i][p][m] = new TH2D(Form("h2_d%s_%s_%s_%d", kMName[m], kGrpName[kPairA[p]], kGrpName[kPairB[p]], i+1),
+            Form("dPT %s vs dPT %s, %s (%s); dPT %s; dPT %s", kGrpName[kPairA[p]], kGrpName[kPairB[p]], kMName[m], npustr.Data(),
+                 kGrpName[kPairA[p]], kGrpName[kPairB[p]]), 80, -20, 20, 80, -20, 20);
+      }
+   }
+   h_DepthFracMean[index][i] = new TH1D(Form("h_DepthFracMean_%d", i+1),
+      Form("mean over hadronic PF of sum_K pf_hcalDepthK (%s); sum depth", npustr.Data()), 300, 0, 3);
+   h_DepthFracMean[index][i]->Sumw2();
+}
+
+void NoiseTerm::FillPFTypeHistos(int ieta, int islot, const RandCone &rc, double jec1, double jec2, double w)
+{
+   for (int m = 0; m < 2; ++m) {
+      const double *g1 = (m == 0) ? rc.gP1 : rc.gR1;
+      const double *g2 = (m == 0) ? rc.gP2 : rc.gR2;
+      const double *d1 = (m == 0) ? rc.dP1 : rc.dR1;
+      const double *d2 = (m == 0) ? rc.dP2 : rc.dR2;
+
+      double x1[kNGrp + 1], x2[kNGrp + 1];
+      double s1 = 0., s2 = 0.;
+      for (int g = 0; g < kNGrp; ++g) {
+         x1[g] = g1[g] * jec1;  x2[g] = g2[g] * jec2;
+         s1 += x1[g];  s2 += x2[g];
+      }
+      x1[kNGrp] = s1;  x2[kNGrp] = s2;
+
+      for (int g = 0; g <= kNGrp; ++g) {
+         const double d = x1[g] - x2[g];
+         const double a = 0.5 * (x1[g] + x2[g]);
+         FillHisto(h_dPT_grp[ieta][islot][g][m], d, w);
+         FillHisto(h_ET_grp[ieta][islot][g][m], x1[g], w);
+         FillHisto(h_ET_grp[ieta][islot][g][m], x2[g], w);
+         p_d2VsAvg_grp[ieta][islot][g][m]->Fill(a, d * d, w);
+      }
+      for (int k = 0; k < kNDepth; ++k) {
+         FillHisto(h_dPT_depth[ieta][islot][k][m], d1[k] * jec1 - d2[k] * jec2, w);
+      }
+      for (int p = 0; p < kNPair; ++p) {
+         FillHisto(h2_dPT_pair[ieta][islot][p][m],
+                   x1[kPairA[p]] - x2[kPairA[p]], x1[kPairB[p]] - x2[kPairB[p]], w);
+      }
+   }
+   if (rc.nHad1 > 0) FillHisto(h_DepthFracMean[ieta][islot], rc.depFrac1 / rc.nHad1, w);
+   if (rc.nHad2 > 0) FillHisto(h_DepthFracMean[ieta][islot], rc.depFrac2 / rc.nHad2, w);
 }
 
 void NoiseTerm::End()
@@ -544,6 +622,12 @@ RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
    int num_rc1_pf = 0;
    int num_rc2_pf = 0;
 
+   // PF-type / HCAL-depth ET sums per cone (reset on every retry, copied to the result at the end).
+   RandCone acc;
+   const std::vector<float>* depthVec[kNDepth] = {
+      pf_hcalDepth1, pf_hcalDepth2, pf_hcalDepth3, pf_hcalDepth4,
+      pf_hcalDepth5, pf_hcalDepth6, pf_hcalDepth7 };
+
    double total_weight1 = 0.;
    double total_weight2 = 0.;
 
@@ -598,6 +682,7 @@ RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
       depositETRC1 = 0; depositETRC2 = 0;
       num_rc1_pf = 0; num_rc2_pf = 0;
       total_weight1 = 0.; total_weight2 = 0.;
+      acc = RandCone();   // zero all per-group / per-depth sums
 
       bool overlayed_ = false;
 
@@ -623,6 +708,23 @@ RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
 
          double weight = isPuppi ? pf_puppiW->at(i) : 1.0;
 
+         // group + per-depth ET of this candidate (depth branches taken as energy fractions: ET*fraction)
+         const int ptype = pf_type->at(i);
+         const int grp = (ptype == 0 || ptype == 1) ? (int)gCH
+                       : (ptype == 2) ? (int)gNH
+                       : (ptype == 3) ? (int)gPH
+                       : (ptype == 4) ? (int)gHFH
+                       : (ptype == 5) ? (int)gHFE : (int)gOTH;
+         const double etPF = pf_et->at(i);
+         double depET[kNDepth];
+         double depFracSum = 0.;
+         for (int k = 0; k < kNDepth; ++k) {
+            double f = (depthVec[k] && i < depthVec[k]->size()) ? depthVec[k]->at(i) : 0.;
+            depET[k] = etPF * f;
+            depFracSum += f;
+         }
+         const bool isHadPF = (ptype == 0 || ptype == 1 || ptype == 2 || ptype == 4);
+
          bool tempInCone1 = false;
          bool tempInCone2 = false;
 
@@ -632,6 +734,9 @@ RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
             tempInCone1 = true;
             depositERC1 += pf_energy->at(i) * weight;
             depositETRC1 += pf_et->at(i) * weight;
+            acc.gP1[grp] += etPF * weight;  acc.gR1[grp] += etPF;
+            for (int k = 0; k < kNDepth; ++k) { acc.dP1[k] += depET[k] * weight; acc.dR1[k] += depET[k]; }
+            if (isHadPF) { acc.depFrac1 += depFracSum; acc.nHad1++; }
             total_weight1 += weight;
             num_rc1_pf++;
          }
@@ -642,6 +747,9 @@ RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
             tempInCone2 = true;
             depositERC2 += pf_energy->at(i) * weight;
             depositETRC2 += pf_et->at(i) * weight;
+            acc.gP2[grp] += etPF * weight;  acc.gR2[grp] += etPF;
+            for (int k = 0; k < kNDepth; ++k) { acc.dP2[k] += depET[k] * weight; acc.dR2[k] += depET[k]; }
+            if (isHadPF) { acc.depFrac2 += depFracSum; acc.nHad2++; }
             total_weight2 += weight;
             num_rc2_pf++;
          }
@@ -668,6 +776,7 @@ RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
       diff_ = depositETRC1 - depositETRC2;
       JetCone1.SetPtEtaPhiE(depositETRC1, eta1, phi1, depositETRC1);
       JetCone2.SetPtEtaPhiE(depositETRC2, eta2, phi2, depositETRC2);
+      tmp = acc;   // keep the per-group / per-depth sums of the accepted cone pair
    }
    tmp.diff_ = diff_;
    tmp.findRC = isRC;
