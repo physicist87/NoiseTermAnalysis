@@ -419,7 +419,7 @@ void NoiseTerm::BookPFTypeHistos(int index, int i, const TString &npustr)
       }
    }
    h_DepthFracMean[index][i] = new TH1D(Form("h_DepthFracMean_%d", i+1),
-      Form("mean over hadronic PF of sum_K pf_hcalDepthK (%s); sum depth", npustr.Data()), 300, 0, 3);
+      Form("mean over hadronic PF of sum_K pf_hcalDepthK/pf_energy (%s); sum of depth fractions", npustr.Data()), 300, 0, 3);
    h_DepthFracMean[index][i]->Sumw2();
 }
 
@@ -708,7 +708,8 @@ RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
 
          double weight = isPuppi ? pf_puppiW->at(i) : 1.0;
 
-         // group + per-depth ET of this candidate (depth branches taken as energy fractions: ET*fraction)
+         // group + per-depth ET of this candidate. The ntuple stores pf_hcalDepthK as an energy in GeV
+         // (fraction x hcalEnergy), so the depth fraction of the candidate is pf_hcalDepthK / pf_energy.
          const int ptype = pf_type->at(i);
          const int grp = (ptype == 0 || ptype == 1) ? (int)gCH
                        : (ptype == 2) ? (int)gNH
@@ -716,10 +717,12 @@ RandCone NoiseTerm::SetRandomCone(double upperEta, double lowerEta)
                        : (ptype == 4) ? (int)gHFH
                        : (ptype == 5) ? (int)gHFE : (int)gOTH;
          const double etPF = pf_et->at(i);
+         const double ePF  = pf_energy->at(i);
          double depET[kNDepth];
          double depFracSum = 0.;
          for (int k = 0; k < kNDepth; ++k) {
-            double f = (depthVec[k] && i < depthVec[k]->size()) ? depthVec[k]->at(i) : 0.;
+            double eDep = (depthVec[k] && i < depthVec[k]->size()) ? depthVec[k]->at(i) : 0.;
+            double f = (ePF > 0.) ? eDep / ePF : 0.;
             depET[k] = etPF * f;
             depFracSum += f;
          }
