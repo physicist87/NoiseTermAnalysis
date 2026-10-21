@@ -34,6 +34,10 @@ def scan(url):
             obj = k.ReadObj()
             if obj.InheritsFrom("TDirectory"):
                 walk(obj, prefix + k.GetName() + "/")
+            elif obj.InheritsFrom("TProfile"):
+                # GetSumOfWeights() of a TProfile is the sum of bin means, not additive; use the bin weights
+                sumw = sum(obj.GetBinEntries(i) for i in range(obj.GetNbinsX() + 2))
+                out[prefix + k.GetName()] = (obj.GetEntries(), sumw)
             elif obj.InheritsFrom("TH1"):
                 out[prefix + k.GetName()] = (obj.GetEntries(), obj.GetSumOfWeights())
     walk(f, "")
