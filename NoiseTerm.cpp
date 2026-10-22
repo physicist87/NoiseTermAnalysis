@@ -411,6 +411,11 @@ void NoiseTerm::BookPFTypeHistos(int index, int i, const TString &npustr)
          h_dPT_depth[index][i][k][m] = new TH1D(Form("h_d%s_Depth%d_%d", kMName[m], k+1, i+1),
             Form("dPT RC1-RC2 %s HCAL depth %d (%s); dPT", kMName[m], k+1, npustr.Data()), 1000, -50, 50);
          h_dPT_depth[index][i][k][m]->Sumw2();
+         h_ET_depth[index][i][k][m] = new TH1D(Form("h_ET%s_Depth%d_%d", kMName[m], k+1, i+1),
+            Form("cone ET %s HCAL depth %d (%s); ET", kMName[m], k+1, npustr.Data()), 500, 0, 50);
+         h_ET_depth[index][i][k][m]->Sumw2();
+         p_d2VsAvg_depth[index][i][k][m] = new TProfile(Form("p_d2VsAvg%s_Depth%d_%d", kMName[m], k+1, i+1),
+            Form("<dPT^2> vs mean ET %s HCAL depth %d (%s); (ET1+ET2)/2; <dPT^2>", kMName[m], k+1, npustr.Data()), 60, 0, 30);
       }
       for (int p = 0; p < kNPair; ++p) {
          h2_dPT_pair[index][i][p][m] = new TH2D(Form("h2_d%s_%s_%s_%d", kMName[m], kGrpName[kPairA[p]], kGrpName[kPairB[p]], i+1),
@@ -448,7 +453,11 @@ void NoiseTerm::FillPFTypeHistos(int ieta, int islot, const RandCone &rc, double
          p_d2VsAvg_grp[ieta][islot][g][m]->Fill(a, d * d, w);
       }
       for (int k = 0; k < kNDepth; ++k) {
-         FillHisto(h_dPT_depth[ieta][islot][k][m], d1[k] * jec1 - d2[k] * jec2, w);
+         const double e1 = d1[k] * jec1, e2 = d2[k] * jec2;
+         FillHisto(h_dPT_depth[ieta][islot][k][m], e1 - e2, w);
+         FillHisto(h_ET_depth[ieta][islot][k][m], e1, w);
+         FillHisto(h_ET_depth[ieta][islot][k][m], e2, w);
+         p_d2VsAvg_depth[ieta][islot][k][m]->Fill(0.5 * (e1 + e2), (e1 - e2) * (e1 - e2), w);
       }
       for (int p = 0; p < kNPair; ++p) {
          FillHisto(h2_dPT_pair[ieta][islot][p][m],

@@ -197,9 +197,13 @@ class NoiseTerm : public NoiseTree
       TProfile *p_d2VsAvg_grp[20][9][kNGrp + 1][2];
       // dPT per HCAL depth (ET * depth fraction), RC1-RC2, after JEC.
       TH1D *h_dPT_depth[20][9][kNDepth][2];
+      // ET of each cone per HCAL depth (RC1 and RC2 both filled), after JEC.
+      TH1D *h_ET_depth[20][9][kNDepth][2];
+      // <(dPT)^2> vs mean ET of the two cones, per HCAL depth.
+      TProfile *p_d2VsAvg_depth[20][9][kNDepth][2];
       // 2D (dPT_A, dPT_B) for the correlation of the fluctuations of two groups.
       TH2D *h2_dPT_pair[20][9][kNPair][2];
-      // mean over hadronic PF in the cone of sum_K pf_hcalDepthK (== 1 if the branches are energy fractions).
+      // mean over hadronic PF in the cone of sum_K pf_hcalDepthK/pf_energy (HCAL fraction of the candidate energy).
       TH1D *h_DepthFracMean[20][9];
 
 };

@@ -21,7 +21,7 @@ CONDOR_DIR = PKG_DIR / "CondorJobs"
 RUN_SCRIPT = CONDOR_DIR / "run_condor.sh"
 TARBALL = CONDOR_DIR / "NoiseTermAnalysis.tar.gz"
 
-DEFAULT_TAG = "Run3_2025_PUPPI_v5"
+DEFAULT_TAG = "Run3_2025_PUPPI_v6"
 DEFAULT_SE_HOST = "root://cluster142.knu.ac.kr"
 DEFAULT_SE_BASE = "/store/user/sha/JERNoiseStudy/Run3/2025/NoiseTerm"
 
