@@ -91,6 +91,7 @@ def write_jdl(args, key, cfgrel, sample, jobs):
             "RequestMemory = 9 GB\n"
             "RequestDisk   = 10 GB\n"
             "+JobType      = \"long\"\n"
+            f"batch_name    = {args.study}_{key}_{sample}{'_test' if args.test else ''}\n"
             f"Queue JobId, InputListPath, InputListName from {queue}\n"
         )
     return jdl
