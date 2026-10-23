@@ -19,10 +19,17 @@
 // without any code needing to branch on which kind of file it is.
 //
 // Usage:
-//   ./PUProfile <input_list> <output_root_file>
+//   ./PUProfile <input_list> <output_root_file> [<trigger>]
 //
 //   <input_list>       one ROOT file path (local or root://) per line
 //   <output_root_file> output file containing a single histogram "pileup"
+//   <trigger>          optional, data only (e.g. HLT_ZeroBias): keep only events
+//                      that pass a trigger whose name contains this string and
+//                      fill mu with the prescale as weight - same selection and
+//                      weight as NoiseTerm::Trigger() / GetPreScaleFactor().
+//                      NoiseTerm weights data events by w_PU x prescale, so the
+//                      PU-reweighting denominator must be prescale-weighted too.
+//                      "pileup_noPS" (same events, weight 1) is written as well.
 //
 ////////////////////////////////////////////////////////////////////////////
 
@@ -33,6 +40,8 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <TH1D.h>
+#include <TString.h>
+#include <vector>
 
 using namespace std;
 
@@ -40,12 +49,15 @@ int main(int argc, char **argv)
 {
    if (argc < 3)
    {
-      cout << "Usage: " << argv[0] << " <input_list> <output_root_file>" << endl;
+      cout << "Usage: " << argv[0] << " <input_list> <output_root_file> [<trigger>]" << endl;
       return 1;
    }
 
    string inputList  = argv[1];
    string outputFile = argv[2];
+   string trigName   = (argc > 3) ? argv[3] : "";
+   const bool usePS  = !trigName.empty();
+   if (usePS) cout << "Trigger     = " << trigName << " (prescale-weighted)" << endl;
 
    cout << "Input list  = " << inputList  << endl;
    cout << "Output file = " << outputFile << endl;
@@ -91,6 +103,19 @@ int main(int argc, char **argv)
    Float_t mu = 0;
    ch->SetBranchAddress("mu", &mu);
 
+   vector<bool>   *trigger_pass = 0, *trigger_error = 0, *trigger_run = 0;
+   vector<double> *trigger_prescale = 0;
+   vector<string> *trigger_name = 0;
+   if (usePS)
+   {
+      ch->SetBranchStatus("trigger_*", 1);
+      ch->SetBranchAddress("trigger_pass", &trigger_pass);
+      ch->SetBranchAddress("trigger_error", &trigger_error);
+      ch->SetBranchAddress("trigger_run", &trigger_run);
+      ch->SetBranchAddress("trigger_prescale", &trigger_prescale);
+      ch->SetBranchAddress("trigger_name", &trigger_name);
+   }
+
    // Official pileupCalc convention is 0-100 with 1 unit per bin. Extended
    // to 0-150 here since SingleNeutrino_Flat2025 is a flat-PU0to120 MC
    // sample - both the data-side and MC-side profiles use the same 0-150
@@ -102,17 +127,38 @@ int main(int argc, char **argv)
    // at the top of this file) - not "h_mu".
    TH1D *h_pileup = new TH1D("pileup", "Pileup profile;true interactions (mu);Events", 150, 0, 150);
    h_pileup->Sumw2();
+   TH1D *h_noPS = new TH1D("pileup_noPS", "Pileup profile, triggered events, weight 1;true interactions (mu);Events", 150, 0, 150);
+   h_noPS->Sumw2();
 
+   Long64_t nPass = 0;
    for (Long64_t i = 0; i < nEntries; ++i)
    {
       ch->GetEntry(i);
-      h_pileup->Fill(mu);
+      if (i % 1000000 == 0) cout << "Event " << i << endl;
+      if (!usePS) { h_pileup->Fill(mu); continue; }
+      // trigger pass and prescale: as NoiseTerm::Trigger() and NoiseTerm::GetPreScaleFactor()
+      bool pass = false;
+      double prescale = 1.;
+      for (size_t t = 0; t < trigger_name->size(); ++t)
+      {
+         if (!TString(trigger_name->at(t)).Contains(trigName.c_str())) continue;
+         if (!trigger_pass->at(t) || trigger_error->at(t) || !trigger_run->at(t)) continue;
+         pass = true;
+         if (trigger_prescale->at(t) > prescale) prescale = trigger_prescale->at(t);
+      }
+      if (!pass) continue;
+      nPass++;
+      h_pileup->Fill(mu, prescale);
+      h_noPS->Fill(mu);
    }
 
    cout << "Processed " << nEntries << " events." << endl;
+   if (usePS) cout << "Passed " << trigName << ": " << nPass << " events, <prescale> = "
+                   << (nPass > 0 ? h_pileup->GetSumOfWeights() / nPass : 0.) << endl;
 
    TFile *fout = new TFile(outputFile.c_str(), "RECREATE");
    h_pileup->Write();
+   if (usePS) h_noPS->Write();
    fout->Close();
 
    cout << "Wrote output: " << outputFile << endl;
