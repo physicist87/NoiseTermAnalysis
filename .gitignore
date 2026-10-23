@@ -22,3 +22,4 @@ CondorJobs/*.tar.gz
 CondorJobs/bad_jobs_*.txt
 __pycache__/
 *.pyc
+CondorJobs/puprofile/
