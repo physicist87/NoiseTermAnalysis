@@ -39,6 +39,7 @@ Double_t fJEC(Double_t *x, Double_t *p);
 enum PFGroup { gCH = 0, gNH, gPH, gHFH, gHFE, gOTH, kNGrp };
 static const int kNDepth = 7;      // HCAL depth 1..7
 static const int kNPair  = 4;      // 2D correlation pairs: (CH,NH) (CH,PH) (NH,PH) (HFH,HFE)
+static const int kNMode  = 3;      // cone sum mode: 0 = PUPPI-weighted, 1 = raw (all PF), 2 = CHS (PF types 1-5, weight 1)
 
 struct RandCone {   
     double diff_;
@@ -54,6 +55,8 @@ struct RandCone {
     // nHad/depFrac* : diagnostics for the pf_hcalDepthK meaning (mean over hadronic PF of sum_K depthK).
     double gP1[kNGrp] = {}, gP2[kNGrp] = {}, gR1[kNGrp] = {}, gR2[kNGrp] = {};
     double dP1[kNDepth] = {}, dP2[kNDepth] = {}, dR1[kNDepth] = {}, dR2[kNDepth] = {};
+    // gC*/dC* = CHS sums (pf_et of PF types 1-5 with weight 1), same cone pair as the PUPPI one.
+    double gC1[kNGrp] = {}, gC2[kNGrp] = {}, dC1[kNDepth] = {}, dC2[kNDepth] = {};
     double depFrac1 = 0, depFrac2 = 0;
     int nHad1 = 0, nHad2 = 0;
 };
@@ -188,21 +191,24 @@ class NoiseTerm : public NoiseTree
 
       TH2D *h_JetVeto;
 
-      // ---- PF-type / HCAL-depth decomposition. Last index m: 0 = PUPPI-weighted, 1 = raw (unweighted) ----
+      // ---- PF-type / HCAL-depth decomposition. Last index m: 0 = PUPPI-weighted, 1 = raw (unweighted), 2 = CHS ----
       // dPT per group (+ [kNGrp] = sum over all groups), RC1-RC2, after JEC (same factor as the total).
-      TH1D *h_dPT_grp[20][9][kNGrp + 1][2];
+      TH1D *h_dPT_grp[20][9][kNGrp + 1][kNMode];
       // ET of each cone per group (RC1 and RC2 both filled), after JEC.
-      TH1D *h_ET_grp[20][9][kNGrp + 1][2];
+      TH1D *h_ET_grp[20][9][kNGrp + 1][kNMode];
       // <(dPT)^2> vs mean ET of the two cones, per group: RMS = sqrt(<d^2>/2) as a function of the mean.
-      TProfile *p_d2VsAvg_grp[20][9][kNGrp + 1][2];
+      TProfile *p_d2VsAvg_grp[20][9][kNGrp + 1][kNMode];
       // dPT per HCAL depth (ET * depth fraction), RC1-RC2, after JEC.
-      TH1D *h_dPT_depth[20][9][kNDepth][2];
+      TH1D *h_dPT_depth[20][9][kNDepth][kNMode];
       // ET of each cone per HCAL depth (RC1 and RC2 both filled), after JEC.
-      TH1D *h_ET_depth[20][9][kNDepth][2];
+      TH1D *h_ET_depth[20][9][kNDepth][kNMode];
       // <(dPT)^2> vs mean ET of the two cones, per HCAL depth.
-      TProfile *p_d2VsAvg_depth[20][9][kNDepth][2];
+      TProfile *p_d2VsAvg_depth[20][9][kNDepth][kNMode];
       // 2D (dPT_A, dPT_B) for the correlation of the fluctuations of two groups.
-      TH2D *h2_dPT_pair[20][9][kNPair][2];
+      TH2D *h2_dPT_pair[20][9][kNPair][kNMode];
+      // Total over all groups WITHOUT the JEC factor (2025 has no AK4PFchs JEC): dPT RC1-RC2 and cone ET.
+      TH1D *h_dPT_noJEC[20][9][kNMode];
+      TH1D *h_ET_noJEC[20][9][kNMode];
       // mean over hadronic PF in the cone of sum_K pf_hcalDepthK/pf_energy (HCAL fraction of the candidate energy).
       TH1D *h_DepthFracMean[20][9];
 
