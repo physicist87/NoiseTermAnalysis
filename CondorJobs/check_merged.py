@@ -8,10 +8,13 @@ Needs ROOT (after cmsenv) and a grid proxy.
 Examples:
   python3 CondorJobs/check_merged.py --samples C
   python3 CondorJobs/check_merged.py --samples C --subs top EtaBin_0_0.261 EtaBin_3.839_5.191 --jobs 6
+  python3 CondorJobs/check_merged.py --samples all --subs all --condor     (one Condor job per check; use this on cms01)
+  grep -h "OK\|FAIL" CondorJobs/condorLog/check_merged/<study>/*.out      (summary after the jobs finish)
 """
 import argparse
 import math
 import os
+import subprocess
 import sys
 from multiprocessing import Pool
 from pathlib import Path
@@ -49,6 +52,55 @@ def close(a, b):
     return math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-9)
 
 
+def submit_condor(args):
+    """One Condor job per (key, sub): the files are opened on a worker, not on the login node."""
+    here = Path(__file__).resolve().parent
+    sub_dir = here / "condorSubmit" / "check_merged" / args.study
+    log_dir = here / "condorLog" / "check_merged" / args.study
+    sub_dir.mkdir(parents=True, exist_ok=True)
+    log_dir.mkdir(parents=True, exist_ok=True)
+    label = "_".join(args.samples)
+    queue = sub_dir / f"{label}.queue"
+    n = 0
+    with open(queue, "w") as q:
+        for key, group, cfgrel, samples in ENTRIES:
+            if not any(s in ("all", key, group) for s in args.samples):
+                continue
+            subs = args.subs
+            if subs == ["all"]:
+                groups = collect_inputs(args.se_host, args.se_base, args.study, os.path.dirname(cfgrel), samples)
+                subs = ["top" if g == "" else g for g in sorted(groups)]
+            for sub in subs:
+                q.write(f"{key}_{sub} {key} {sub}\n")
+                n += 1
+    files = ",".join(str(here / f) for f in ("check_merged.py", "run_hadd.py", "submit_jobs.py"))
+    jdl = sub_dir / f"{label}.jdl"
+    with open(jdl, "w") as f:
+        f.write(
+            "Universe   = vanilla\n"
+            f"Executable = {here / 'run_check_merged_condor.sh'}\n"
+            f"Arguments  = \"{args.study} $(Key) $(Sub) {args.se_host} {args.se_base}\"\n"
+            "getenv     = False\n"
+            "use_x509userproxy      = true\n"
+            "should_transfer_files   = YES\n"
+            "when_to_transfer_output = ON_EXIT\n"
+            f"transfer_input_files    = {files}\n"
+            "transfer_output_files   = \"\"\n"
+            f"Log    = {log_dir}/$(Tag).log\n"
+            f"Output = {log_dir}/$(Tag).out\n"
+            f"Error  = {log_dir}/$(Tag).err\n"
+            "RequestCpus   = 2\n"
+            "RequestMemory = 4 GB\n"
+            "RequestDisk   = 1 GB\n"
+            f"batch_name    = check_merged_{args.study}_{label}\n"
+            f"Queue Tag, Key, Sub from {queue}\n"
+        )
+    print(f"{n} check job(s)  {jdl}")
+    if n and not args.dry_run:
+        subprocess.run(["condor_submit", str(jdl)], check=True)
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--study", default=DEFAULT_TAG)
@@ -57,7 +109,14 @@ def main():
     ap.add_argument("--se-host", default=os.environ.get("SE_HOST", DEFAULT_SE_HOST))
     ap.add_argument("--se-base", default=os.environ.get("SE_BASE", DEFAULT_SE_BASE))
     ap.add_argument("--jobs", type=int, default=6)
+    ap.add_argument("--condor", action="store_true", help="submit one Condor job per (key, sub) instead of checking here")
+    ap.add_argument("--dry-run", action="store_true", help="with --condor: write the JDL, do not submit")
+    ap.add_argument("--local", action="store_true", help=argparse.SUPPRESS)  # set by the Condor worker
     args = ap.parse_args()
+    if args.condor:
+        return submit_condor(args)
+    if args.subs == ["all"]:
+        sys.exit("--subs all is only for --condor")
 
     nfail = 0
     for key, group, cfgrel, samples in ENTRIES:

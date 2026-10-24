@@ -10,6 +10,7 @@ Examples:
   python3 CondorJobs/run_hadd.py --samples C --dry-run
   python3 CondorJobs/run_hadd.py --samples C --jobs 6
   python3 CondorJobs/run_hadd.py --samples all --jobs 8
+  python3 CondorJobs/run_hadd.py --samples mc pu --condor      (one Condor job per output file; use this on cms01)
 """
 import argparse
 import os
@@ -74,6 +75,55 @@ def merge_one(host, se_base, study, cfgdir, stem, sub, urls, tmpdir, overwrite):
     return tag, (f"ok {size:.1f} MB" if ok else f"STAGEOUT FAILED {c.stderr.strip()[-200:]}"), len(urls)
 
 
+def submit_condor(args, tasks):
+    """One Condor job per (config, EtaBin dir): the merge runs on a worker, not on the login node."""
+    condor_dir = Path(__file__).resolve().parent
+    sub_dir = condor_dir / "condorSubmit" / "hadd" / args.study
+    log_dir = condor_dir / "condorLog" / "hadd" / args.study
+    sub_dir.mkdir(parents=True, exist_ok=True)
+    log_dir.mkdir(parents=True, exist_ok=True)
+    label = "_".join(args.samples)
+    queue = sub_dir / f"{label}.queue"
+    n = 0
+    with open(queue, "w") as q:
+        for cfgdir, stem, sub, urls in tasks:
+            dest_dir = f"{args.se_base}/{args.study}_Merged/{cfgdir}/{stem}" + (f"/{sub}" if sub else "")
+            dest = f"{dest_dir}/{stem}.root"
+            tag = f"{cfgdir.replace('/', '_')}_{stem}_{sub or 'top'}"
+            if not args.overwrite and xrd_exists(args.se_host, dest):
+                print(f"   skip (exists) {tag}")
+                continue
+            lp = sub_dir / f"{tag}.txt"
+            lp.write_text("\n".join(urls) + "\n")
+            q.write(f"{tag} {lp} {lp.name} {dest}\n")
+            n += 1
+    jdl = sub_dir / f"{label}.jdl"
+    with open(jdl, "w") as f:
+        f.write(
+            "Universe   = vanilla\n"
+            f"Executable = {condor_dir / 'run_hadd_condor.sh'}\n"
+            f"Arguments  = \"$(ListName) {args.se_host} $(Dest)\"\n"
+            "getenv     = False\n"
+            "use_x509userproxy      = true\n"
+            "should_transfer_files   = YES\n"
+            "when_to_transfer_output = ON_EXIT\n"
+            "transfer_input_files    = $(ListPath)\n"
+            "transfer_output_files   = \"\"\n"
+            f"Log    = {log_dir}/$(Tag).log\n"
+            f"Output = {log_dir}/$(Tag).out\n"
+            f"Error  = {log_dir}/$(Tag).err\n"
+            "RequestCpus   = 1\n"
+            "RequestMemory = 4 GB\n"
+            "RequestDisk   = 10 GB\n"
+            f"batch_name    = hadd_{args.study}_{label}\n"
+            f"Queue Tag, ListPath, ListName, Dest from {queue}\n"
+        )
+    print(f"{n} hadd job(s)  {jdl}")
+    if n and not args.dry_run:
+        subprocess.run(["condor_submit", str(jdl)], check=True)
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--study", default=DEFAULT_TAG)
@@ -84,9 +134,10 @@ def main():
     ap.add_argument("--tmpdir", default=os.environ.get("TMPDIR", "/tmp"), help="local scratch for merged files")
     ap.add_argument("--overwrite", action="store_true", help="redo merges whose output already exists")
     ap.add_argument("--dry-run", action="store_true", help="only list what would be merged")
+    ap.add_argument("--condor", action="store_true", help="submit one Condor job per output file instead of merging here")
     args = ap.parse_args()
 
-    if not args.dry_run and shutil.which("hadd") is None:
+    if not args.dry_run and not args.condor and shutil.which("hadd") is None:
         sys.exit("hadd not found: run cmsenv first")
 
     tasks = []
@@ -100,6 +151,9 @@ def main():
               f"{sum(len(v) for v in groups.values())} input file(s)")
         for sub, urls in sorted(groups.items()):
             tasks.append((cfgdir, stem, sub, urls))
+
+    if args.condor:
+        return submit_condor(args, tasks)
 
     if args.dry_run or not tasks:
         for cfgdir, stem, sub, urls in tasks[:25]:
