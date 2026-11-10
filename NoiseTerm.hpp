@@ -206,6 +206,13 @@ class NoiseTerm : public NoiseTree
       TProfile *p_d2VsAvg_depth[20][9][kNDepth][kNMode];
       // 2D (dPT_A, dPT_B) for the correlation of the fluctuations of two groups.
       TH2D *h2_dPT_pair[20][9][kNPair][kNMode];
+      // v8: dPT per group / per HCAL depth WITHOUT the pairs where both cones are empty for that group/depth
+      // (empty = cone sum of w*ET of that group/depth exactly 0; for CHS w = 1). Same binning as h_dPT_grp/h_dPT_depth.
+      TH1D *h_dPT_grpNZ[20][9][kNGrp][kNMode];
+      TH1D *h_dPT_depthNZ[20][9][kNDepth][kNMode];
+      // v8: weighted pair counts: bin 1 = all pairs, bins 2..kNGrp+1 = both cones empty per group,
+      // bins kNGrp+2..kNGrp+kNDepth+1 = both cones empty per HCAL depth. f0 = bin(k)/bin(1).
+      TH1D *h_NEmpty[20][9][kNMode];
       // Total over all groups WITHOUT the JEC factor (2025 has no AK4PFchs JEC): dPT RC1-RC2 and cone ET.
       TH1D *h_dPT_noJEC[20][9][kNMode];
       TH1D *h_ET_noJEC[20][9][kNMode];

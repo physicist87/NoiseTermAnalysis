@@ -423,6 +423,23 @@ void NoiseTerm::BookPFTypeHistos(int index, int i, const TString &npustr)
       h_ET_noJEC[index][i][m] = new TH1D(Form("h_ETNoJEC%s_ALL_%d", kMName[m], i+1),
          Form("cone ET %s ALL, no JEC (%s); ET", kMName[m], npustr.Data()), 500, 0, 50);
       h_ET_noJEC[index][i][m]->Sumw2();
+      for (int g = 0; g < kNGrp; ++g) {
+         h_dPT_grpNZ[index][i][g][m] = new TH1D(Form("h_d%sNZ_%s_%d", kMName[m], kGrpName[g], i+1),
+            Form("dPT RC1-RC2 %s %s, both-empty pairs removed (%s); dPT", kMName[m], kGrpName[g], npustr.Data()), 1000, -50, 50);
+         h_dPT_grpNZ[index][i][g][m]->Sumw2();
+      }
+      for (int k = 0; k < kNDepth; ++k) {
+         h_dPT_depthNZ[index][i][k][m] = new TH1D(Form("h_d%sNZ_Depth%d_%d", kMName[m], k+1, i+1),
+            Form("dPT RC1-RC2 %s HCAL depth %d, both-empty pairs removed (%s); dPT", kMName[m], k+1, npustr.Data()), 1000, -50, 50);
+         h_dPT_depthNZ[index][i][k][m]->Sumw2();
+      }
+      h_NEmpty[index][i][m] = new TH1D(Form("h_NEmpty%s_%d", kMName[m], i+1),
+         Form("weighted cone pairs: all, both cones empty per group / depth, %s (%s)", kMName[m], npustr.Data()),
+         1 + kNGrp + kNDepth, 0.5, 1.5 + kNGrp + kNDepth);
+      h_NEmpty[index][i][m]->Sumw2();
+      h_NEmpty[index][i][m]->GetXaxis()->SetBinLabel(1, "all");
+      for (int g = 0; g < kNGrp; ++g) h_NEmpty[index][i][m]->GetXaxis()->SetBinLabel(2 + g, kGrpName[g]);
+      for (int k = 0; k < kNDepth; ++k) h_NEmpty[index][i][m]->GetXaxis()->SetBinLabel(2 + kNGrp + k, Form("Depth%d", k+1));
       for (int p = 0; p < kNPair; ++p) {
          h2_dPT_pair[index][i][p][m] = new TH2D(Form("h2_d%s_%s_%s_%d", kMName[m], kGrpName[kPairA[p]], kGrpName[kPairB[p]], i+1),
             Form("dPT %s vs dPT %s, %s (%s); dPT %s; dPT %s", kGrpName[kPairA[p]], kGrpName[kPairB[p]], kMName[m], npustr.Data(),
@@ -469,6 +486,16 @@ void NoiseTerm::FillPFTypeHistos(int ieta, int islot, const RandCone &rc, double
          FillHisto(h_ET_depth[ieta][islot][k][m], e1, w);
          FillHisto(h_ET_depth[ieta][islot][k][m], e2, w);
          p_d2VsAvg_depth[ieta][islot][k][m]->Fill(0.5 * (e1 + e2), (e1 - e2) * (e1 - e2), w);
+      }
+      // v8: remove only the pairs where BOTH cones are empty (sum of w*ET exactly 0, before JEC)
+      FillHisto(h_NEmpty[ieta][islot][m], 1., w);
+      for (int g = 0; g < kNGrp; ++g) {
+         if (g1[g] == 0. && g2[g] == 0.) { FillHisto(h_NEmpty[ieta][islot][m], 2. + g, w); continue; }
+         FillHisto(h_dPT_grpNZ[ieta][islot][g][m], x1[g] - x2[g], w);
+      }
+      for (int k = 0; k < kNDepth; ++k) {
+         if (d1[k] == 0. && d2[k] == 0.) { FillHisto(h_NEmpty[ieta][islot][m], 2. + kNGrp + k, w); continue; }
+         FillHisto(h_dPT_depthNZ[ieta][islot][k][m], d1[k] * jec1 - d2[k] * jec2, w);
       }
       for (int p = 0; p < kNPair; ++p) {
          FillHisto(h2_dPT_pair[ieta][islot][p][m],
