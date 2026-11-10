@@ -216,6 +216,9 @@ class NoiseTerm : public NoiseTree
       // Total over all groups WITHOUT the JEC factor (2025 has no AK4PFchs JEC): dPT RC1-RC2 and cone ET.
       TH1D *h_dPT_noJEC[20][9][kNMode];
       TH1D *h_ET_noJEC[20][9][kNMode];
+      // v8: dPT RC1-RC2 per group and per HCAL depth WITHOUT the JEC factor (all pairs).
+      TH1D *h_dPT_grpNoJEC[20][9][kNGrp][kNMode];
+      TH1D *h_dPT_depthNoJEC[20][9][kNDepth][kNMode];
       // mean over hadronic PF in the cone of sum_K pf_hcalDepthK/pf_energy (HCAL fraction of the candidate energy).
       TH1D *h_DepthFracMean[20][9];
 
