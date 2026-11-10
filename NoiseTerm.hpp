@@ -38,7 +38,7 @@ Double_t fJEC(Double_t *x, Double_t *p);
 // PH = photon (3), HFH = HF hadron (4), HFE = HF EM (5), OTH = lepton+untracked (6,7; closure only).
 enum PFGroup { gCH = 0, gNH, gPH, gHFH, gHFE, gOTH, kNGrp };
 static const int kNDepth = 7;      // HCAL depth 1..7
-static const int kNPair  = 4;      // 2D correlation pairs: (CH,NH) (CH,PH) (NH,PH) (HFH,HFE)
+static const int kNPair  = 10;     // 2D correlation pairs: (CH,NH) (CH,PH) (NH,PH) (HFH,HFE), v8: + tracker x HF (CH,NH,PH) x (HFH,HFE)
 static const int kNMode  = 3;      // cone sum mode: 0 = PUPPI-weighted, 1 = raw (all PF), 2 = CHS (PF types 1-5, weight 1)
 
 struct RandCone {   

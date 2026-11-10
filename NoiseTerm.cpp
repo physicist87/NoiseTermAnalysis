@@ -391,8 +391,9 @@ void NoiseTerm::DeclareHistos(int index)
 
 static const char* kGrpName[kNGrp + 1] = {"CH", "NH", "PH", "HFH", "HFE", "OTH", "ALL"};
 static const char* kMName[kNMode] = {"Puppi", "Raw", "CHS"};
-static const int kPairA[kNPair] = {gCH, gCH, gNH, gHFH};
-static const int kPairB[kNPair] = {gNH, gPH, gPH, gHFE};
+// first 4 = v7 pairs (same order, same names); v8 adds the 6 tracker x HF pairs
+static const int kPairA[kNPair] = {gCH, gCH, gNH, gHFH, gCH,  gCH,  gNH,  gNH,  gPH,  gPH};
+static const int kPairB[kNPair] = {gNH, gPH, gPH, gHFE, gHFH, gHFE, gHFH, gHFE, gHFH, gHFE};
 
 void NoiseTerm::BookPFTypeHistos(int index, int i, const TString &npustr)
 {
